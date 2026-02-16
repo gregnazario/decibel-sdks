@@ -1,0 +1,22 @@
+# Rust
+sdk-rust/target/
+
+# Swift
+sdk-swift/.build/
+sdk-swift/.swiftpm/
+
+# Kotlin
+sdk-kotlin/build/
+sdk-kotlin/.gradle/
+sdk-kotlin/out/
+
+# Go
+sdk-go/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store

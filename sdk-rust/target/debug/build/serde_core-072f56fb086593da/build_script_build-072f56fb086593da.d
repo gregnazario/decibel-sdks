@@ -1,5 +1,0 @@
-/workspace/sdk-rust/target/debug/build/serde_core-072f56fb086593da/build_script_build-072f56fb086593da.d: /usr/local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/build.rs
-
-/workspace/sdk-rust/target/debug/build/serde_core-072f56fb086593da/build_script_build-072f56fb086593da: /usr/local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/build.rs
-
-/usr/local/cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.228/build.rs:
