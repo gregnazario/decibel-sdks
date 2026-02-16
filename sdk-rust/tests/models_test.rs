@@ -320,14 +320,24 @@ fn given_u8_when_converting_to_time_in_force_then_correct_variant() {
 #[test]
 fn given_candlestick_interval_when_converting_to_str_then_correct_values() {
     assert_eq!(CandlestickInterval::OneMinute.as_str(), "1m");
+    assert_eq!(CandlestickInterval::FiveMinutes.as_str(), "5m");
+    assert_eq!(CandlestickInterval::FifteenMinutes.as_str(), "15m");
+    assert_eq!(CandlestickInterval::ThirtyMinutes.as_str(), "30m");
     assert_eq!(CandlestickInterval::OneHour.as_str(), "1h");
+    assert_eq!(CandlestickInterval::TwoHours.as_str(), "2h");
+    assert_eq!(CandlestickInterval::FourHours.as_str(), "4h");
+    assert_eq!(CandlestickInterval::EightHours.as_str(), "8h");
+    assert_eq!(CandlestickInterval::TwelveHours.as_str(), "12h");
     assert_eq!(CandlestickInterval::OneDay.as_str(), "1d");
+    assert_eq!(CandlestickInterval::ThreeDays.as_str(), "3d");
+    assert_eq!(CandlestickInterval::OneWeek.as_str(), "1w");
     assert_eq!(CandlestickInterval::OneMonth.as_str(), "1mo");
 }
 
 #[test]
 fn given_volume_window_when_converting_to_str_then_correct_values() {
     assert_eq!(VolumeWindow::SevenDays.as_str(), "7d");
+    assert_eq!(VolumeWindow::FourteenDays.as_str(), "14d");
     assert_eq!(VolumeWindow::ThirtyDays.as_str(), "30d");
     assert_eq!(VolumeWindow::NinetyDays.as_str(), "90d");
 }

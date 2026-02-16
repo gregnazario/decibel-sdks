@@ -289,9 +289,36 @@ async fn test_get_account_overview() {
 
     let config = test_config(&mock_server.uri());
     let client = DecibelReadClient::new(config, None, None).unwrap();
-    let overview = client.get_account_overview("0xsub", Some(VolumeWindow::ThirtyDays), None).await.unwrap();
+    let overview = client.get_account_overview("0xsub", Some(VolumeWindow::ThirtyDays), Some(true)).await.unwrap();
     assert_eq!(overview.perp_equity_balance, 10000.0);
     assert_eq!(overview.cross_account_leverage_ratio, Some(5.0));
+}
+
+#[tokio::test]
+async fn test_get_account_overview_no_optional_params() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/api/v1/account/0xsub2"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "perp_equity_balance": 0.0, "unrealized_pnl": 0.0,
+            "unrealized_funding_cost": 0.0, "cross_margin_ratio": 0.0,
+            "maintenance_margin": 0.0, "cross_account_leverage_ratio": null,
+            "volume": null, "net_deposits": null, "all_time_return": null,
+            "pnl_90d": null, "sharpe_ratio": null, "max_drawdown": null,
+            "weekly_win_rate_12w": null, "average_cash_position": null,
+            "average_leverage": null, "cross_account_position": 0.0,
+            "total_margin": 0.0, "usdc_cross_withdrawable_balance": 0.0,
+            "usdc_isolated_withdrawable_balance": 0.0,
+            "realized_pnl": null, "liquidation_fees_paid": null,
+            "liquidation_losses": null
+        })))
+        .mount(&mock_server)
+        .await;
+
+    let config = test_config(&mock_server.uri());
+    let client = DecibelReadClient::new(config, None, None).unwrap();
+    let overview = client.get_account_overview("0xsub2", None, None).await.unwrap();
+    assert_eq!(overview.perp_equity_balance, 0.0);
 }
 
 #[tokio::test]
@@ -669,6 +696,86 @@ async fn test_read_client_with_api_key() {
     let client = DecibelReadClient::new(config, Some("test-key".to_string()), None).unwrap();
     let markets = client.get_all_markets().await.unwrap();
     assert_eq!(markets.len(), 0);
+}
+
+#[tokio::test]
+async fn test_get_market_trades_no_limit() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/api/v1/trades/SOL-USD"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+        .mount(&mock_server)
+        .await;
+
+    let config = test_config(&mock_server.uri());
+    let client = DecibelReadClient::new(config, None, None).unwrap();
+    let trades = client.get_market_trades("SOL-USD", None).await.unwrap();
+    assert_eq!(trades.len(), 0);
+}
+
+#[tokio::test]
+async fn test_get_user_funding_history_no_filters() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/api/v1/funding-history/0xsub2"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"items":[],"total_count":0})))
+        .mount(&mock_server)
+        .await;
+
+    let config = test_config(&mock_server.uri());
+    let client = DecibelReadClient::new(config, None, None).unwrap();
+    let result = client.get_user_funding_history("0xsub2", None, None, None).await.unwrap();
+    assert_eq!(result.total_count, 0);
+}
+
+#[tokio::test]
+async fn test_get_user_order_history_no_filters() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/api/v1/order-history/0xsub2"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({"items":[],"total_count":0})))
+        .mount(&mock_server)
+        .await;
+
+    let config = test_config(&mock_server.uri());
+    let client = DecibelReadClient::new(config, None, None).unwrap();
+    let result = client.get_user_order_history("0xsub2", None, None, None).await.unwrap();
+    assert_eq!(result.total_count, 0);
+}
+
+#[tokio::test]
+async fn test_ws_accessor() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/api/v1/markets"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([])))
+        .mount(&mock_server)
+        .await;
+
+    let config = test_config(&mock_server.uri());
+    let client = DecibelReadClient::new(config, None, None).unwrap();
+    let ws = client.ws();
+    let state = ws.ready_state().await;
+    assert_eq!(state, decibel_sdk::client::ws::WsReadyState::Closed);
+}
+
+#[tokio::test]
+async fn test_api_error_403() {
+    let mock_server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/api/v1/markets"))
+        .respond_with(ResponseTemplate::new(403).set_body_string("Forbidden"))
+        .mount(&mock_server)
+        .await;
+
+    let config = test_config(&mock_server.uri());
+    let client = DecibelReadClient::new(config, None, None).unwrap();
+    let result = client.get_all_markets().await;
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        decibel_sdk::DecibelError::Api { status, .. } => assert_eq!(status, 403),
+        other => panic!("Expected Api error, got {:?}", other),
+    }
 }
 
 #[tokio::test]
