@@ -31,12 +31,14 @@ impl Default for TransactionBuildOptions {
 
 /// Generate an expiration timestamp for a transaction.
 /// Default: 60 seconds from now, with optional time delta correction.
+/// The adjusted time is clamped to be non-negative so that a large negative
+/// delta does not produce an underflow when cast to u64.
 pub fn generate_expire_timestamp(time_delta_ms: i64) -> u64 {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis() as i64;
-    let adjusted = now + time_delta_ms;
+    let adjusted = (now + time_delta_ms).max(0);
     ((adjusted / 1000) + 60) as u64
 }
 

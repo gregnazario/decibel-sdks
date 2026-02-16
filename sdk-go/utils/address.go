@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"math"
-	"math/rand"
 	"strings"
 
 	"golang.org/x/crypto/sha3"
@@ -19,7 +20,7 @@ func GetMarketAddr(name string, perpEngineGlobalAddr string) string {
 }
 
 // GetPrimarySubaccountAddr derives the primary subaccount address for an account.
-func GetPrimarySubaccountAddr(accountAddr string, compatVersion string, packageAddr string) string {
+func GetPrimarySubaccountAddr(accountAddr string, _ string, packageAddr string) string {
 	addrBytes := hexToBytes(accountAddr)
 	seed := fmt.Sprintf("%s::dex_accounts::primary_account", stripHexPrefix(packageAddr))
 	objectAddr := createObjectAddress(addrBytes, []byte(seed))
@@ -73,12 +74,16 @@ func bcsSerializeString(s string) []byte {
 }
 
 // hexToBytes converts a hex string (with optional 0x prefix) to bytes.
+// Panics if the hex string is invalid.
 func hexToBytes(hexStr string) []byte {
 	stripped := stripHexPrefix(hexStr)
 	if len(stripped)%2 != 0 {
 		stripped = "0" + stripped
 	}
-	bytes, _ := hex.DecodeString(stripped)
+	bytes, err := hex.DecodeString(stripped)
+	if err != nil {
+		panic(fmt.Errorf("failed to decode hex string %q: %w", hexStr, err))
+	}
 	return bytes
 }
 
@@ -87,7 +92,7 @@ func stripHexPrefix(s string) string {
 }
 
 // RoundToTickSize rounds a price to the nearest valid tick size.
-func RoundToTickSize(price float64, tickSize float64, pxDecimals int32, roundUp bool) float64 {
+func RoundToTickSize(price float64, tickSize float64, _ int32, roundUp bool) float64 {
 	if tickSize <= 0 {
 		return price
 	}
@@ -101,9 +106,14 @@ func RoundToTickSize(price float64, tickSize float64, pxDecimals int32, roundUp 
 	return roundedTicks * tickSize
 }
 
-// GenerateRandomReplayProtectionNonce generates a random nonce for replay protection.
+// GenerateRandomReplayProtectionNonce generates a cryptographically secure
+// random nonce for replay protection.
 func GenerateRandomReplayProtectionNonce() uint64 {
-	return rand.Uint64()
+	var buf [8]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		panic(fmt.Errorf("failed to generate random nonce: %w", err))
+	}
+	return binary.BigEndian.Uint64(buf[:])
 }
 
 // ExtractOrderIDFromEvents extracts an order ID from transaction events.
@@ -131,4 +141,3 @@ func ExtractOrderIDFromEvents(events []map[string]interface{}, subaccountAddr st
 	}
 	return nil
 }
-

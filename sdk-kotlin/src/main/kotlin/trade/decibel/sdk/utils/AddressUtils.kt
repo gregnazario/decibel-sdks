@@ -1,9 +1,9 @@
 package trade.decibel.sdk.utils
 
 import java.security.MessageDigest
+import java.security.SecureRandom
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.random.Random
 
 object AddressUtils {
 
@@ -14,7 +14,7 @@ object AddressUtils {
         return "0x" + objectAddr.joinToString("") { "%02x".format(it) }
     }
 
-    fun getPrimarySubaccountAddr(accountAddr: String, compatVersion: String, packageAddr: String): String {
+    fun getPrimarySubaccountAddr(accountAddr: String, @Suppress("UNUSED_PARAMETER") compatVersion: String, packageAddr: String): String {
         val addrBytes = hexToBytes(accountAddr)
         val seedStr = "${stripHexPrefix(packageAddr)}::dex_accounts::primary_account"
         val seed = seedStr.toByteArray()
@@ -29,7 +29,7 @@ object AddressUtils {
         return "0x" + objectAddr.joinToString("") { "%02x".format(it) }
     }
 
-    fun roundToTickSize(price: Double, tickSize: Double, pxDecimals: Int, roundUp: Boolean): Double {
+    fun roundToTickSize(price: Double, tickSize: Double, @Suppress("UNUSED_PARAMETER") pxDecimals: Int, roundUp: Boolean): Double {
         if (tickSize <= 0) return price
         val ticks = price / tickSize
         val roundedTicks = if (roundUp) ceil(ticks) else floor(ticks)
@@ -37,7 +37,9 @@ object AddressUtils {
     }
 
     fun generateRandomReplayProtectionNonce(): ULong {
-        return Random.nextLong().toULong()
+        val bytes = ByteArray(8)
+        SecureRandom().nextBytes(bytes)
+        return bytes.fold(0UL) { acc, b -> (acc shl 8) or (b.toUByte().toULong()) }
     }
 
     private fun createObjectAddress(source: ByteArray, seed: ByteArray): ByteArray {
@@ -45,8 +47,7 @@ object AddressUtils {
         val srcLen = minOf(source.size, 32)
         System.arraycopy(source, 0, paddedSource, 32 - srcLen, srcLen)
 
-        // Note: Using SHA-256 as placeholder. Aptos uses SHA3-256.
-        val digest = MessageDigest.getInstance("SHA-256")
+        val digest = MessageDigest.getInstance("SHA3-256")
         digest.update(paddedSource)
         digest.update(seed)
         digest.update(byteArrayOf(0xFE.toByte()))
