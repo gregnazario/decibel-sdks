@@ -12,6 +12,7 @@ sdk-kotlin/out/
 
 # Go
 sdk-go/vendor/
+sdk-go/coverage.out
 
 # IDE
 .idea/
