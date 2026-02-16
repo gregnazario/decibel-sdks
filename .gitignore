@@ -21,3 +21,4 @@ sdk-go/coverage.out
 *.swo
 *~
 .DS_Store
+sdk-go/integration
