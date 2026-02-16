@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"math"
@@ -133,5 +132,3 @@ func ExtractOrderIDFromEvents(events []map[string]interface{}, subaccountAddr st
 	return nil
 }
 
-// Ensure sha256 is used somewhere to prevent unused import
-var _ = sha256.New

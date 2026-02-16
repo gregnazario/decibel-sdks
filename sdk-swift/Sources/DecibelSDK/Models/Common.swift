@@ -72,7 +72,7 @@ public enum TwapStatus: String, Codable {
 
 public enum VaultType: String, Codable {
     case user
-    case protocol
+    case `protocol`
 }
 
 public enum MarketDepthAggregationSize: Int {
