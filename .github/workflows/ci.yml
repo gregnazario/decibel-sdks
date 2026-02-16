@@ -82,23 +82,57 @@ jobs:
 
   swift:
     name: Swift SDK
-    runs-on: ubuntu-22.04
+    runs-on: macos-14
     defaults:
       run:
         working-directory: sdk-swift
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: '5.10'
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
 
       - name: Build
         run: swift build -v
 
-      - name: Run tests
-        run: swift test -v
+      - name: Run tests with coverage
+        run: swift test --enable-code-coverage -v
+
+      - name: Export coverage
+        run: |
+          BIN_PATH=$(swift build --show-bin-path)
+          XCTEST_PATH=$(find "${BIN_PATH}" -name '*.xctest' -type d | head -1)
+          PROFDATA=$(find .build -name 'default.profdata' -type f | head -1)
+          if [ -n "$XCTEST_PATH" ] && [ -n "$PROFDATA" ]; then
+            EXEC_PATH="${XCTEST_PATH}/Contents/MacOS/$(basename "${XCTEST_PATH}" .xctest)"
+            if [ -f "$EXEC_PATH" ]; then
+              xcrun llvm-cov report "$EXEC_PATH" -instr-profile="$PROFDATA" -ignore-filename-regex='.build|Tests' | tee coverage-summary.txt
+              xcrun llvm-cov export "$EXEC_PATH" -instr-profile="$PROFDATA" -format=lcov -ignore-filename-regex='.build|Tests' > coverage.lcov
+            else
+              echo "macOS xctest binary not found at $EXEC_PATH, trying direct binary"
+              EXEC_PATH=$(find "${BIN_PATH}" -name 'DecibelSDKPackageTests' -type f ! -name '*.o' | head -1)
+              if [ -n "$EXEC_PATH" ]; then
+                xcrun llvm-cov report "$EXEC_PATH" -instr-profile="$PROFDATA" -ignore-filename-regex='.build|Tests' | tee coverage-summary.txt
+                xcrun llvm-cov export "$EXEC_PATH" -instr-profile="$PROFDATA" -format=lcov -ignore-filename-regex='.build|Tests' > coverage.lcov
+              else
+                echo "No test binary found for coverage export"
+              fi
+            fi
+          else
+            echo "Coverage data not found"
+          fi
+
+      - name: Display coverage summary
+        run: cat coverage-summary.txt 2>/dev/null || echo "No coverage summary available"
+
+      - name: Upload Swift coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: swift-coverage
+          path: |
+            sdk-swift/coverage-summary.txt
+            sdk-swift/coverage.lcov
 
   kotlin:
     name: Kotlin SDK
