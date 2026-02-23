@@ -22,11 +22,27 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+
+    // Cucumber for BDD testing
+    testImplementation("io.cucumber:cucumber-java8:7.14.0")
+    testImplementation("io.cucumber:cucumber-junit:7.14.0")
+    testImplementation("org.junit.vintage:junit-vintage-engine:5.10.0")
 }
 
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+}
+
+// Configure Cucumber test runner
+tasks.register<Test>("bddTest") {
+    description = "Runs BDD tests with Cucumber"
+    group = "verification"
+    useJUnitPlatform {
+        includeTags("cucumber")
+    }
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
 }
 
 jacoco {

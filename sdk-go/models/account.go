@@ -93,3 +93,40 @@ type UserTradeHistoryItem struct {
 	TransactionUnixMs     int64   `json:"transaction_unix_ms"`
 	TransactionVersion    int64   `json:"transaction_version"`
 }
+
+// LeaderboardEntry represents a single entry in the leaderboard.
+type LeaderboardEntry struct {
+	Rank         int64   `json:"rank"`
+	Account      string  `json:"account"`
+	AccountValue float64 `json:"account_value"`
+	RealizedPnl  float64 `json:"realized_pnl"`
+	ROI          float64 `json:"roi"`
+	Volume       float64 `json:"volume"`
+}
+
+// VaultPerformance represents performance metrics for a vault.
+type VaultPerformance struct {
+	VaultAddress        string  `json:"vault_address"`
+	VaultName           string  `json:"vault_name"`
+	UserDeposits        float64 `json:"user_deposits"`
+	UserShares          float64 `json:"user_shares"`
+	UserPnl             float64 `json:"user_pnl"`
+	UserReturnValue     float64 `json:"user_return_value"`
+}
+
+// UserTwapHistoryItem represents a TWAP order in history.
+type UserTwapHistoryItem struct {
+	Market             string  `json:"market"`
+	IsBuy              bool    `json:"is_buy"`
+	OrderID            string  `json:"order_id"`
+	ClientOrderID      string  `json:"client_order_id"`
+	IsReduceOnly       bool    `json:"is_reduce_only"`
+	StartUnixMs        int64   `json:"start_unix_ms"`
+	FrequencyS         int64   `json:"frequency_s"`
+	DurationS          int64   `json:"duration_s"`
+	OrigSize           float64 `json:"orig_size"`
+	ExecutedSize       float64 `json:"executed_size"`
+	Status             string  `json:"status"`
+	TransactionUnixMs  int64   `json:"transaction_unix_ms"`
+	TransactionVersion int64   `json:"transaction_version"`
+}
