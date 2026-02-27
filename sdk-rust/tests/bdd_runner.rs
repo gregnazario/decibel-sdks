@@ -9,5 +9,5 @@ use bdd::TestWorld;
 
 #[tokio::main]
 async fn main() {
-    TestWorld::run("features/").await;
+    TestWorld::run("../features/").await;
 }

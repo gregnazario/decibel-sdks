@@ -10,5 +10,5 @@ use bdd::TestWorld;
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
-    TestWorld::run("features/").await;
+    TestWorld::run("../features/").await;
 }
