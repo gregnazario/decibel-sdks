@@ -30,3 +30,11 @@ tracing-subscriber = "0.3"
 cucumber = "0.21"
 async-trait = "0.1"
 dotenv = "0.15"
+
+[[test]]
+name = "bdd_runner"
+harness = false
+
+[[test]]
+name = "bdd_runner_simple"
+harness = false
