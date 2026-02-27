@@ -22,11 +22,12 @@ func init() {
 
 func TestFeatures(t *testing.T) {
 	o := opt
-	if godog.TestSuite{
+	suite := godog.TestSuite{
 		Name:                "bdd",
-		ScenarioInitializer:  InitializeScenario,
+		ScenarioInitializer: InitializeScenario,
 		Options:             &o,
-	}.Run() != 0 {
+	}
+	if suite.Run() != 0 {
 		t.Fatal("failed to run feature suite")
 	}
 }
