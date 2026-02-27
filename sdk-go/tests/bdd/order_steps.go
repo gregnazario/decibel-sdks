@@ -18,17 +18,17 @@ func NewOrderSteps(world *TestWorld) *OrderSteps {
 
 // RegisterSteps registers all order steps with godog.
 func (s *OrderSteps) RegisterSteps(ctx *godog.ScenarioContext) {
-	ctx.Given(`^I have an initialized Decibel write client$`, s.givenWriteClient)
-	ctx.Given(`^I have configured my subaccount for the ([^"]*) market$`, s.givenConfiguredMarket)
-	ctx.When(`^I place a limit buy order$`, s.placeLimitBuyOrder)
-	ctx.Then(`^the order should be accepted$`, s.orderAccepted)
-	ctx.And(`^the order should have an order ID$`, s.checkOrderId)
-	ctx.When(`^I request the open orders for my subaccount$`, s.requestOpenOrders)
-	ctx.Then(`^I should receive a list of open orders$`, s.shouldReceiveOpenOrders)
-	ctx.And(`^each order should have a market$`, s.checkOrderMarket)
-	ctx.And(`^each order should have a price$`, s.checkOrderPrice)
-	ctx.And(`^each order should have a size$`, s.checkOrderSize)
-	ctx.And(`^each order should indicate if it is a buy or sell$`, s.checkOrderSide)
+	ctx.Step(`^I have an initialized Decibel write client$`, s.givenWriteClient)
+	ctx.Step(`^I have configured my subaccount for the ([^"]*) market$`, s.givenConfiguredMarket)
+	ctx.Step(`^I place a limit buy order$`, s.placeLimitBuyOrder)
+	ctx.Step(`^the order should be accepted$`, s.orderAccepted)
+	ctx.Step(`^the order should have an order ID$`, s.checkOrderId)
+	ctx.Step(`^I request the open orders for my subaccount$`, s.requestOpenOrders)
+	ctx.Step(`^I should receive a list of open orders$`, s.shouldReceiveOpenOrders)
+	ctx.Step(`^each order should have a market$`, s.checkOrderMarket)
+	ctx.Step(`^each order should have a price$`, s.checkOrderPrice)
+	ctx.Step(`^each order should have a size$`, s.checkOrderSize)
+	ctx.Step(`^each order should indicate if it is a buy or sell$`, s.checkOrderSide)
 	// Additional steps can be added following the same pattern
 }
 

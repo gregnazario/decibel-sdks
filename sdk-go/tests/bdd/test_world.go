@@ -14,8 +14,7 @@ type TestWorld struct {
 	APIKey string
 
 	// Clients
-	ReadClient  *decibel.DecibelReadClient
-	WriteClient *decibel.DecibelWriteClient
+	ReadClient *decibel.DecibelReadClient
 
 	// Error state
 	LastError error
@@ -67,7 +66,6 @@ func NewTestWorld() *TestWorld {
 func (w *TestWorld) Clear() {
 	w.Config = nil
 	w.ReadClient = nil
-	w.WriteClient = nil
 	w.LastError = nil
 	w.Markets = nil
 	w.MarketDepth = nil
@@ -108,7 +106,8 @@ func (w *TestWorld) SetError(err error) {
 func (w *TestWorld) GetReadClient() (*decibel.DecibelReadClient, error) {
 	if w.ReadClient == nil {
 		if w.Config == nil {
-			w.Config = decibel.TestnetConfig()
+			cfg := decibel.TestnetConfig()
+			w.Config = &cfg
 		}
 		client, err := decibel.NewDecibelReadClient(w.Config, w.APIKey)
 		if err != nil {

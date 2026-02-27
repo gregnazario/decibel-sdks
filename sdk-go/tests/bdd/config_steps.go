@@ -1,7 +1,6 @@
 package bdd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/cucumber/godog"
@@ -20,17 +19,17 @@ func NewConfigSteps(world *TestWorld) *ConfigSteps {
 
 // RegisterSteps registers all configuration steps with godog.
 func (s *ConfigSteps) RegisterSteps(ctx *godog.ScenarioContext) {
-	ctx.Given(`^I have an uninitialized Decibel configuration$`, s.iHaveAnUninitializedConfig)
-	ctx.When(`^I create a read client using the ([^"]*) preset configuration$`, s.iCreateReadClientWithPreset)
-	ctx.When(`^I create a read client with custom endpoints$`, s.iCreateReadClientWithCustomEndpoints)
-	ctx.Then(`^the client should be configured for the ([^"]*) environment$`, s.clientShouldBeConfiguredFor)
-	ctx.Then(`^the client should have a valid HTTP client$`, s.clientShouldHaveValidHTTPClient)
-	ctx.Then(`^the client should use the ([^"]*) API endpoint$`, s.clientShouldUseAPIEndpoint)
-	ctx.Then(`^the client should have chain ID set to (\d+)$`, s.clientShouldHaveChainID)
-	ctx.Then(`^the client should have the correct deployment addresses$`, s.clientShouldHaveDeploymentAddresses)
-	ctx.When(`^I request a configuration named ([^"]*)$`, s.iRequestConfigNamed)
-	ctx.Then(`^I should receive the ([^"]*) configuration$`, s.iShouldReceiveConfig)
-	ctx.Then(`^the configuration should be valid$`, s.configShouldBeValid)
+	ctx.Step(`^I have an uninitialized Decibel configuration$`, s.iHaveAnUninitializedConfig)
+	ctx.Step(`^I create a read client using the ([^"]*) preset configuration$`, s.iCreateReadClientWithPreset)
+	ctx.Step(`^I create a read client with custom endpoints$`, s.iCreateReadClientWithCustomEndpoints)
+	ctx.Step(`^the client should be configured for the ([^"]*) environment$`, s.clientShouldBeConfiguredFor)
+	ctx.Step(`^the client should have a valid HTTP client$`, s.clientShouldHaveValidHTTPClient)
+	ctx.Step(`^the client should use the ([^"]*) API endpoint$`, s.clientShouldUseAPIEndpoint)
+	ctx.Step(`^the client should have chain ID set to (\d+)$`, s.clientShouldHaveChainID)
+	ctx.Step(`^the client should have the correct deployment addresses$`, s.clientShouldHaveDeploymentAddresses)
+	ctx.Step(`^I request a configuration named ([^"]*)$`, s.iRequestConfigNamed)
+	ctx.Step(`^I should receive the ([^"]*) configuration$`, s.iShouldReceiveConfig)
+	ctx.Step(`^the configuration should be valid$`, s.configShouldBeValid)
 }
 
 func (s *ConfigSteps) iHaveAnUninitializedConfig() error {

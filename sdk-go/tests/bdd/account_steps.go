@@ -18,17 +18,17 @@ func NewAccountSteps(world *TestWorld) *AccountSteps {
 
 // RegisterSteps registers all account steps with godog.
 func (s *AccountSteps) RegisterSteps(ctx *godog.ScenarioContext) {
-	ctx.Given(`^I have an initialized Decibel read client$`, s.givenReadClient)
-	ctx.Given(`^I have a subaccount address ([^"]*)$`, s.givenSubaccountAddress)
-	ctx.When(`^I request the account overview for a subaccount$`, s.requestAccountOverview)
-	ctx.Then(`^I should receive the account overview data$`, s.shouldReceiveAccountOverview)
-	ctx.And(`^the overview should include the total margin$`, s.checkTotalMargin)
-	ctx.And(`^the overview should include the unrealized PnL$`, s.checkUnrealizedPnl)
-	ctx.And(`^the overview should include the cross margin ratio$`, s.checkCrossMarginRatio)
-	ctx.When(`^I request the account positions$`, s.requestPositions)
-	ctx.Then(`^I should receive the account positions$`, s.shouldReceivePositions)
-	ctx.When(`^I request the account open orders$`, s.requestOpenOrders)
-	ctx.Then(`^I should receive the open orders$`, s.shouldReceiveOpenOrders)
+	ctx.Step(`^I have an initialized Decibel read client$`, s.givenReadClient)
+	ctx.Step(`^I have a subaccount address ([^"]*)$`, s.givenSubaccountAddress)
+	ctx.Step(`^I request the account overview for a subaccount$`, s.requestAccountOverview)
+	ctx.Step(`^I should receive the account overview data$`, s.shouldReceiveAccountOverview)
+	ctx.Step(`^the overview should include the total margin$`, s.checkTotalMargin)
+	ctx.Step(`^the overview should include the unrealized PnL$`, s.checkUnrealizedPnl)
+	ctx.Step(`^the overview should include the cross margin ratio$`, s.checkCrossMarginRatio)
+	ctx.Step(`^I request the account positions$`, s.requestPositions)
+	ctx.Step(`^I should receive the account positions$`, s.shouldReceivePositions)
+	ctx.Step(`^I request the account open orders$`, s.requestOpenOrders)
+	ctx.Step(`^I should receive the open orders$`, s.shouldReceiveOpenOrders)
 	// Additional steps can be added following the same pattern
 }
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cucumber/godog"
+	"github.com/gregnazario/decibel-sdks/sdk-go/models"
 )
 
 // PositionSteps implements BDD steps for position management scenarios.
@@ -18,17 +19,17 @@ func NewPositionSteps(world *TestWorld) *PositionSteps {
 
 // RegisterSteps registers all position steps with godog.
 func (s *PositionSteps) RegisterSteps(ctx *godog.ScenarioContext) {
-	ctx.Given(`^I have an initialized Decibel read client$`, s.givenReadClient)
-	ctx.Given(`^I have an open position in the ([^"]*) market$`, s.givenOpenPosition)
-	ctx.When(`^I request my positions$`, s.requestPositions)
-	ctx.Then(`^I should receive my open positions$`, s.shouldReceivePositions)
-	ctx.And(`^each position should have a market$`, s.checkPositionMarket)
-	ctx.And(`^each position should have a size$`, s.checkPositionSize)
-	ctx.And(`^each position should have an entry price$`, s.checkEntryPrice)
-	ctx.And(`^each position should have unrealized PnL$`, s.checkUnrealizedPnl)
-	ctx.When(`^I request the position for the ([^"]*) market$`, s.requestPositionForMarket)
-	ctx.Then(`^I should receive the position data$`, s.shouldReceivePositionData)
-	ctx.And(`^the position should indicate if it is long or short$`, s.checkPositionDirection)
+	ctx.Step(`^I have an initialized Decibel read client$`, s.givenReadClient)
+	ctx.Step(`^I have an open position in the ([^"]*) market$`, s.givenOpenPosition)
+	ctx.Step(`^I request my positions$`, s.requestPositions)
+	ctx.Step(`^I should receive my open positions$`, s.shouldReceivePositions)
+	ctx.Step(`^each position should have a market$`, s.checkPositionMarket)
+	ctx.Step(`^each position should have a size$`, s.checkPositionSize)
+	ctx.Step(`^each position should have an entry price$`, s.checkEntryPrice)
+	ctx.Step(`^each position should have unrealized PnL$`, s.checkUnrealizedPnl)
+	ctx.Step(`^I request the position for the ([^"]*) market$`, s.requestPositionForMarket)
+	ctx.Step(`^I should receive the position data$`, s.shouldReceivePositionData)
+	ctx.Step(`^the position should indicate if it is long or short$`, s.checkPositionDirection)
 	// Additional steps can be added following the same pattern
 }
 
@@ -145,7 +146,7 @@ func (s *PositionSteps) requestPositionForMarket(market string) error {
 	}
 
 	// Filter to only the requested market
-	var filtered []model.UserPosition
+	var filtered []models.UserPosition
 	for _, p := range positions {
 		if p.Market == market {
 			filtered = append(filtered, p)

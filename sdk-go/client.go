@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gregnazario/decibel-sdks/sdk-go/models"
 )
 
 // DecibelReadClient provides read-only access to the Decibel API.
@@ -57,9 +59,9 @@ func (c *DecibelReadClient) doGet(endpoint string) ([]byte, error) {
 	}
 
 	if resp.StatusCode >= 400 {
-		return nil, &DecibelError{
+		return nil, &APIError{
+			Status:  resp.StatusCode,
 			Message: string(body),
-			Code:    resp.StatusCode,
 		}
 	}
 
@@ -67,13 +69,13 @@ func (c *DecibelReadClient) doGet(endpoint string) ([]byte, error) {
 }
 
 // GetAllMarkets retrieves all market configurations.
-func (c *DecibelReadClient) GetAllMarkets() ([]PerpMarketConfig, error) {
+func (c *DecibelReadClient) GetAllMarkets() ([]models.PerpMarketConfig, error) {
 	body, err := c.doGet("/markets")
 	if err != nil {
 		return nil, err
 	}
 
-	var markets []PerpMarketConfig
+	var markets []models.PerpMarketConfig
 	if err := json.Unmarshal(body, &markets); err != nil {
 		return nil, fmt.Errorf("failed to parse markets: %w", err)
 	}
@@ -82,13 +84,13 @@ func (c *DecibelReadClient) GetAllMarkets() ([]PerpMarketConfig, error) {
 }
 
 // GetMarketByName retrieves a specific market by name.
-func (c *DecibelReadClient) GetMarketByName(name string) (*PerpMarketConfig, error) {
+func (c *DecibelReadClient) GetMarketByName(name string) (*models.PerpMarketConfig, error) {
 	body, err := c.doGet("/markets/" + name)
 	if err != nil {
 		return nil, err
 	}
 
-	var market PerpMarketConfig
+	var market models.PerpMarketConfig
 	if err := json.Unmarshal(body, &market); err != nil {
 		return nil, fmt.Errorf("failed to parse market: %w", err)
 	}
@@ -97,7 +99,7 @@ func (c *DecibelReadClient) GetMarketByName(name string) (*PerpMarketConfig, err
 }
 
 // GetMarketDepth retrieves the order book for a market.
-func (c *DecibelReadClient) GetMarketDepth(marketName string, limit *int) (*MarketDepth, error) {
+func (c *DecibelReadClient) GetMarketDepth(marketName string, limit *int) (*models.MarketDepth, error) {
 	endpoint := "/market_depth/" + marketName
 	if limit != nil {
 		endpoint += "?limit=" + strconv.Itoa(*limit)
@@ -108,7 +110,7 @@ func (c *DecibelReadClient) GetMarketDepth(marketName string, limit *int) (*Mark
 		return nil, err
 	}
 
-	var depth MarketDepth
+	var depth models.MarketDepth
 	if err := json.Unmarshal(body, &depth); err != nil {
 		return nil, fmt.Errorf("failed to parse market depth: %w", err)
 	}
@@ -117,13 +119,13 @@ func (c *DecibelReadClient) GetMarketDepth(marketName string, limit *int) (*Mark
 }
 
 // GetAllMarketPrices retrieves prices for all markets.
-func (c *DecibelReadClient) GetAllMarketPrices() ([]MarketPrice, error) {
+func (c *DecibelReadClient) GetAllMarketPrices() ([]models.MarketPrice, error) {
 	body, err := c.doGet("/market_prices")
 	if err != nil {
 		return nil, err
 	}
 
-	var prices []MarketPrice
+	var prices []models.MarketPrice
 	if err := json.Unmarshal(body, &prices); err != nil {
 		return nil, fmt.Errorf("failed to parse market prices: %w", err)
 	}
@@ -132,13 +134,13 @@ func (c *DecibelReadClient) GetAllMarketPrices() ([]MarketPrice, error) {
 }
 
 // GetMarketPriceByName retrieves the price for a specific market.
-func (c *DecibelReadClient) GetMarketPriceByName(name string) ([]MarketPrice, error) {
+func (c *DecibelReadClient) GetMarketPriceByName(name string) ([]models.MarketPrice, error) {
 	body, err := c.doGet("/market_prices/" + name)
 	if err != nil {
 		return nil, err
 	}
 
-	var prices []MarketPrice
+	var prices []models.MarketPrice
 	if err := json.Unmarshal(body, &prices); err != nil {
 		return nil, fmt.Errorf("failed to parse market price: %w", err)
 	}
@@ -147,7 +149,7 @@ func (c *DecibelReadClient) GetMarketPriceByName(name string) ([]MarketPrice, er
 }
 
 // GetMarketTrades retrieves recent trades for a market.
-func (c *DecibelReadClient) GetMarketTrades(marketName string, limit *int) ([]MarketTrade, error) {
+func (c *DecibelReadClient) GetMarketTrades(marketName string, limit *int) ([]models.MarketTrade, error) {
 	endpoint := "/market_trades/" + marketName
 	if limit != nil {
 		endpoint += "?limit=" + strconv.Itoa(*limit)
@@ -158,7 +160,7 @@ func (c *DecibelReadClient) GetMarketTrades(marketName string, limit *int) ([]Ma
 		return nil, err
 	}
 
-	var trades []MarketTrade
+	var trades []models.MarketTrade
 	if err := json.Unmarshal(body, &trades); err != nil {
 		return nil, fmt.Errorf("failed to parse market trades: %w", err)
 	}
@@ -167,7 +169,7 @@ func (c *DecibelReadClient) GetMarketTrades(marketName string, limit *int) ([]Ma
 }
 
 // GetCandlesticks retrieves historical candlestick data.
-func (c *DecibelReadClient) GetCandlesticks(marketName, interval string, startTime, endTime *int64) ([]Candlestick, error) {
+func (c *DecibelReadClient) GetCandlesticks(marketName, interval string, startTime, endTime *int64) ([]models.Candlestick, error) {
 	endpoint := "/candlesticks/" + marketName + "/" + interval
 	queryParams := ""
 	if startTime != nil {
@@ -185,7 +187,7 @@ func (c *DecibelReadClient) GetCandlesticks(marketName, interval string, startTi
 		return nil, err
 	}
 
-	var candlesticks []Candlestick
+	var candlesticks []models.Candlestick
 	if err := json.Unmarshal(body, &candlesticks); err != nil {
 		return nil, fmt.Errorf("failed to parse candlesticks: %w", err)
 	}
@@ -194,13 +196,13 @@ func (c *DecibelReadClient) GetCandlesticks(marketName, interval string, startTi
 }
 
 // GetAllMarketContexts retrieves context data for all markets.
-func (c *DecibelReadClient) GetAllMarketContexts() ([]MarketContext, error) {
+func (c *DecibelReadClient) GetAllMarketContexts() ([]models.MarketContext, error) {
 	body, err := c.doGet("/market_contexts")
 	if err != nil {
 		return nil, err
 	}
 
-	var contexts []MarketContext
+	var contexts []models.MarketContext
 	if err := json.Unmarshal(body, &contexts); err != nil {
 		return nil, fmt.Errorf("failed to parse market contexts: %w", err)
 	}
@@ -209,13 +211,13 @@ func (c *DecibelReadClient) GetAllMarketContexts() ([]MarketContext, error) {
 }
 
 // GetAccountOverview retrieves the account overview for a subaccount.
-func (c *DecibelReadClient) GetAccountOverview(subaccountAddr string) (*AccountOverview, error) {
+func (c *DecibelReadClient) GetAccountOverview(subaccountAddr string) (*models.AccountOverview, error) {
 	body, err := c.doGet("/account_overview/" + subaccountAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var overview AccountOverview
+	var overview models.AccountOverview
 	if err := json.Unmarshal(body, &overview); err != nil {
 		return nil, fmt.Errorf("failed to parse account overview: %w", err)
 	}
@@ -224,13 +226,13 @@ func (c *DecibelReadClient) GetAccountOverview(subaccountAddr string) (*AccountO
 }
 
 // GetUserPositions retrieves all positions for a subaccount.
-func (c *DecibelReadClient) GetUserPositions(subaccountAddr string) ([]UserPosition, error) {
+func (c *DecibelReadClient) GetUserPositions(subaccountAddr string) ([]models.UserPosition, error) {
 	body, err := c.doGet("/positions/" + subaccountAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var positions []UserPosition
+	var positions []models.UserPosition
 	if err := json.Unmarshal(body, &positions); err != nil {
 		return nil, fmt.Errorf("failed to parse positions: %w", err)
 	}
@@ -239,13 +241,13 @@ func (c *DecibelReadClient) GetUserPositions(subaccountAddr string) ([]UserPosit
 }
 
 // GetUserOpenOrders retrieves all open orders for a subaccount.
-func (c *DecibelReadClient) GetUserOpenOrders(subaccountAddr string) ([]UserOpenOrder, error) {
+func (c *DecibelReadClient) GetUserOpenOrders(subaccountAddr string) ([]models.UserOpenOrder, error) {
 	body, err := c.doGet("/open_orders/" + subaccountAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var orders []UserOpenOrder
+	var orders []models.UserOpenOrder
 	if err := json.Unmarshal(body, &orders); err != nil {
 		return nil, fmt.Errorf("failed to parse open orders: %w", err)
 	}
@@ -254,7 +256,7 @@ func (c *DecibelReadClient) GetUserOpenOrders(subaccountAddr string) ([]UserOpen
 }
 
 // GetUserOrderHistory retrieves the order history for a subaccount.
-func (c *DecibelReadClient) GetUserOrderHistory(subaccountAddr string, limit, offset *int, marketName *string) ([]UserOrderHistoryItem, error) {
+func (c *DecibelReadClient) GetUserOrderHistory(subaccountAddr string, limit, offset *int, marketName *string) ([]models.UserOrderHistoryItem, error) {
 	endpoint := "/order_history/" + subaccountAddr
 	queryParams := ""
 	if limit != nil {
@@ -275,7 +277,7 @@ func (c *DecibelReadClient) GetUserOrderHistory(subaccountAddr string, limit, of
 		return nil, err
 	}
 
-	var history []UserOrderHistoryItem
+	var history []models.UserOrderHistoryItem
 	if err := json.Unmarshal(body, &history); err != nil {
 		return nil, fmt.Errorf("failed to parse order history: %w", err)
 	}
@@ -284,7 +286,7 @@ func (c *DecibelReadClient) GetUserOrderHistory(subaccountAddr string, limit, of
 }
 
 // GetUserTradeHistory retrieves the trade history for a subaccount.
-func (c *DecibelReadClient) GetUserTradeHistory(subaccountAddr string, limit, offset *int, marketName *string) ([]UserTradeHistoryItem, error) {
+func (c *DecibelReadClient) GetUserTradeHistory(subaccountAddr string, limit, offset *int, marketName *string) ([]models.UserTradeHistoryItem, error) {
 	endpoint := "/trade_history/" + subaccountAddr
 	queryParams := ""
 	if limit != nil {
@@ -305,7 +307,7 @@ func (c *DecibelReadClient) GetUserTradeHistory(subaccountAddr string, limit, of
 		return nil, err
 	}
 
-	var history []UserTradeHistoryItem
+	var history []models.UserTradeHistoryItem
 	if err := json.Unmarshal(body, &history); err != nil {
 		return nil, fmt.Errorf("failed to parse trade history: %w", err)
 	}
@@ -314,7 +316,7 @@ func (c *DecibelReadClient) GetUserTradeHistory(subaccountAddr string, limit, of
 }
 
 // GetUserFundingHistory retrieves the funding payment history for a subaccount.
-func (c *DecibelReadClient) GetUserFundingHistory(subaccountAddr string, limit, offset *int, marketName *string) ([]UserFundingHistoryItem, error) {
+func (c *DecibelReadClient) GetUserFundingHistory(subaccountAddr string, limit, offset *int, marketName *string) ([]models.UserFundingHistoryItem, error) {
 	endpoint := "/funding_history/" + subaccountAddr
 	queryParams := ""
 	if limit != nil {
@@ -335,7 +337,7 @@ func (c *DecibelReadClient) GetUserFundingHistory(subaccountAddr string, limit, 
 		return nil, err
 	}
 
-	var history []UserFundingHistoryItem
+	var history []models.UserFundingHistoryItem
 	if err := json.Unmarshal(body, &history); err != nil {
 		return nil, fmt.Errorf("failed to parse funding history: %w", err)
 	}
@@ -344,7 +346,7 @@ func (c *DecibelReadClient) GetUserFundingHistory(subaccountAddr string, limit, 
 }
 
 // GetUserFundHistory retrieves the deposit/withdrawal history for a subaccount.
-func (c *DecibelReadClient) GetUserFundHistory(subaccountAddr string, limit, offset *int) ([]UserFundHistoryItem, error) {
+func (c *DecibelReadClient) GetUserFundHistory(subaccountAddr string, limit, offset *int) ([]models.UserFundHistoryItem, error) {
 	endpoint := "/fund_history/" + subaccountAddr
 	queryParams := ""
 	if limit != nil {
@@ -362,7 +364,7 @@ func (c *DecibelReadClient) GetUserFundHistory(subaccountAddr string, limit, off
 		return nil, err
 	}
 
-	var history []UserFundHistoryItem
+	var history []models.UserFundHistoryItem
 	if err := json.Unmarshal(body, &history); err != nil {
 		return nil, fmt.Errorf("failed to parse fund history: %w", err)
 	}
@@ -371,13 +373,13 @@ func (c *DecibelReadClient) GetUserFundHistory(subaccountAddr string, limit, off
 }
 
 // GetUserSubaccounts retrieves all subaccounts for an owner address.
-func (c *DecibelReadClient) GetUserSubaccounts(ownerAddr string) ([]UserSubaccount, error) {
+func (c *DecibelReadClient) GetUserSubaccounts(ownerAddr string) ([]models.UserSubaccount, error) {
 	body, err := c.doGet("/subaccounts/" + ownerAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var subaccounts []UserSubaccount
+	var subaccounts []models.UserSubaccount
 	if err := json.Unmarshal(body, &subaccounts); err != nil {
 		return nil, fmt.Errorf("failed to parse subaccounts: %w", err)
 	}
@@ -386,13 +388,13 @@ func (c *DecibelReadClient) GetUserSubaccounts(ownerAddr string) ([]UserSubaccou
 }
 
 // GetDelegations retrieves all delegations for a subaccount.
-func (c *DecibelReadClient) GetDelegations(subaccountAddr string) ([]Delegation, error) {
+func (c *DecibelReadClient) GetDelegations(subaccountAddr string) ([]models.Delegation, error) {
 	body, err := c.doGet("/delegations/" + subaccountAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var delegations []Delegation
+	var delegations []models.Delegation
 	if err := json.Unmarshal(body, &delegations); err != nil {
 		return nil, fmt.Errorf("failed to parse delegations: %w", err)
 	}
@@ -401,13 +403,13 @@ func (c *DecibelReadClient) GetDelegations(subaccountAddr string) ([]Delegation,
 }
 
 // GetActiveTwaps retrieves all active TWAP orders for a subaccount.
-func (c *DecibelReadClient) GetActiveTwaps(subaccountAddr string) ([]UserActiveTwap, error) {
+func (c *DecibelReadClient) GetActiveTwaps(subaccountAddr string) ([]models.UserActiveTwap, error) {
 	body, err := c.doGet("/active_twaps/" + subaccountAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var twaps []UserActiveTwap
+	var twaps []models.UserActiveTwap
 	if err := json.Unmarshal(body, &twaps); err != nil {
 		return nil, fmt.Errorf("failed to parse active TWAPs: %w", err)
 	}
@@ -416,7 +418,7 @@ func (c *DecibelReadClient) GetActiveTwaps(subaccountAddr string) ([]UserActiveT
 }
 
 // GetTwapHistory retrieves the TWAP order history for a subaccount.
-func (c *DecibelReadClient) GetTwapHistory(subaccountAddr string, limit, offset *int) ([]UserTwapHistoryItem, error) {
+func (c *DecibelReadClient) GetTwapHistory(subaccountAddr string, limit, offset *int) ([]models.UserTwapHistoryItem, error) {
 	endpoint := "/twap_history/" + subaccountAddr
 	queryParams := ""
 	if limit != nil {
@@ -434,7 +436,7 @@ func (c *DecibelReadClient) GetTwapHistory(subaccountAddr string, limit, offset 
 		return nil, err
 	}
 
-	var history []UserTwapHistoryItem
+	var history []models.UserTwapHistoryItem
 	if err := json.Unmarshal(body, &history); err != nil {
 		return nil, fmt.Errorf("failed to parse TWAP history: %w", err)
 	}
@@ -443,7 +445,7 @@ func (c *DecibelReadClient) GetTwapHistory(subaccountAddr string, limit, offset 
 }
 
 // GetVaults retrieves all vaults.
-func (c *DecibelReadClient) GetVaults(limit, offset *int) ([]Vault, error) {
+func (c *DecibelReadClient) GetVaults(limit, offset *int) ([]models.Vault, error) {
 	endpoint := "/vaults"
 	queryParams := ""
 	if limit != nil {
@@ -461,7 +463,7 @@ func (c *DecibelReadClient) GetVaults(limit, offset *int) ([]Vault, error) {
 		return nil, err
 	}
 
-	var vaults []Vault
+	var vaults []models.Vault
 	if err := json.Unmarshal(body, &vaults); err != nil {
 		return nil, fmt.Errorf("failed to parse vaults: %w", err)
 	}
@@ -470,13 +472,13 @@ func (c *DecibelReadClient) GetVaults(limit, offset *int) ([]Vault, error) {
 }
 
 // GetUserOwnedVaults retrieves vaults owned by a user.
-func (c *DecibelReadClient) GetUserOwnedVaults(ownerAddr string) ([]Vault, error) {
+func (c *DecibelReadClient) GetUserOwnedVaults(ownerAddr string) ([]models.Vault, error) {
 	body, err := c.doGet("/vaults/owner/" + ownerAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var vaults []Vault
+	var vaults []models.Vault
 	if err := json.Unmarshal(body, &vaults); err != nil {
 		return nil, fmt.Errorf("failed to parse user vaults: %w", err)
 	}
@@ -485,13 +487,13 @@ func (c *DecibelReadClient) GetUserOwnedVaults(ownerAddr string) ([]Vault, error
 }
 
 // GetUserPerformancesOnVaults retrieves performance metrics for vaults the user has interacted with.
-func (c *DecibelReadClient) GetUserPerformancesOnVaults(userAddr string) ([]VaultPerformance, error) {
+func (c *DecibelReadClient) GetUserPerformancesOnVaults(userAddr string) ([]models.VaultPerformance, error) {
 	body, err := c.doGet("/vaults/performance/" + userAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	var performances []VaultPerformance
+	var performances []models.VaultPerformance
 	if err := json.Unmarshal(body, &performances); err != nil {
 		return nil, fmt.Errorf("failed to parse vault performances: %w", err)
 	}
@@ -500,7 +502,7 @@ func (c *DecibelReadClient) GetUserPerformancesOnVaults(userAddr string) ([]Vaul
 }
 
 // GetLeaderboard retrieves the leaderboard.
-func (c *DecibelReadClient) GetLeaderboard(limit, offset *int) ([]LeaderboardEntry, error) {
+func (c *DecibelReadClient) GetLeaderboard(limit, offset *int) ([]models.LeaderboardEntry, error) {
 	endpoint := "/leaderboard"
 	queryParams := ""
 	if limit != nil {
@@ -518,7 +520,7 @@ func (c *DecibelReadClient) GetLeaderboard(limit, offset *int) ([]LeaderboardEnt
 		return nil, err
 	}
 
-	var leaderboard []LeaderboardEntry
+	var leaderboard []models.LeaderboardEntry
 	if err := json.Unmarshal(body, &leaderboard); err != nil {
 		return nil, fmt.Errorf("failed to parse leaderboard: %w", err)
 	}

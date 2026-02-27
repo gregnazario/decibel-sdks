@@ -1,10 +1,10 @@
 package bdd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/cucumber/godog"
+	"github.com/gregnazario/decibel-sdks/sdk-go/models"
 )
 
 // MarketDataSteps implements BDD steps for market data scenarios.
@@ -20,66 +20,66 @@ func NewMarketDataSteps(world *TestWorld) *MarketDataSteps {
 // RegisterSteps registers all market data steps with godog.
 func (s *MarketDataSteps) RegisterSteps(ctx *godog.ScenarioContext) {
 	// Background steps
-	ctx.Given(`^I have an initialized Decibel read client$`, s.givenReadClient)
+	ctx.Step(`^I have an initialized Decibel read client$`, s.givenReadClient)
 
 	// Market listing steps
-	ctx.When(`^I request all markets$`, s.requestAllMarkets)
-	ctx.Then(`^I should receive a list of market configurations$`, s.shouldReceiveMarkets)
-	ctx.And(`^each market should have a market address$`, s.checkMarketAddress)
-	ctx.And(`^each market should have a market name$`, s.checkMarketName)
-	ctx.And(`^each market should have size decimals$`, s.checkSizeDecimals)
-	ctx.And(`^each market should have price decimals$`, s.checkPriceDecimals)
-	ctx.And(`^each market should have maximum leverage$`, s.checkMaxLeverage)
-	ctx.And(`^each market should have minimum order size$`, s.checkMinSize)
-	ctx.And(`^each market should have lot size$`, s.checkLotSize)
-	ctx.And(`^each market should have tick size$`, s.checkTickSize)
+	ctx.Step(`^I request all markets$`, s.requestAllMarkets)
+	ctx.Step(`^I should receive a list of market configurations$`, s.shouldReceiveMarkets)
+	ctx.Step(`^each market should have a market address$`, s.checkMarketAddress)
+	ctx.Step(`^each market should have a market name$`, s.checkMarketName)
+	ctx.Step(`^each market should have size decimals$`, s.checkSizeDecimals)
+	ctx.Step(`^each market should have price decimals$`, s.checkPriceDecimals)
+	ctx.Step(`^each market should have maximum leverage$`, s.checkMaxLeverage)
+	ctx.Step(`^each market should have minimum order size$`, s.checkMinSize)
+	ctx.Step(`^each market should have lot size$`, s.checkLotSize)
+	ctx.Step(`^each market should have tick size$`, s.checkTickSize)
 
 	// Individual market steps
-	ctx.When(`^I request the market with name ([^"]*)$`, s.requestMarketByName)
-	ctx.Then(`^I should receive the ([^"]*) market configuration$`, s.shouldReceiveMarketConfig)
-	ctx.And(`^the market name should be ([^"]*)$`, s.checkMarketNameValue)
-	ctx.And(`^the market should have a valid market address$`, s.checkValidMarketAddress)
+	ctx.Step(`^I request the market with name ([^"]*)$`, s.requestMarketByName)
+	ctx.Step(`^I should receive the ([^"]*) market configuration$`, s.shouldReceiveMarketConfig)
+	ctx.Step(`^the market name should be ([^"]*)$`, s.checkMarketNameValue)
+	ctx.Step(`^the market should have a valid market address$`, s.checkValidMarketAddress)
 
 	// Market depth steps
-	ctx.When(`^I request the market depth for ([^"]*) with no limit$`, s.requestMarketDepthNoLimit)
-	ctx.When(`^I request the market depth for ([^"]*) with a limit of (\d+)$`, s.requestMarketDepthWithLimit)
-	ctx.Then(`^I should receive the current order book$`, s.shouldReceiveOrderBook)
-	ctx.And(`^the order book should contain bid orders$`, s.checkBids)
-	ctx.And(`^the order book should contain ask orders$`, s.checkAsks)
-	ctx.And(`^bid orders should be sorted by price descending$`, s.checkBidsSorted)
-	ctx.And(`^ask orders should be sorted by price ascending$`, s.checkAsksSorted)
-	ctx.And(`^each price level should have a price and size$`, s.checkPriceLevels)
+	ctx.Step(`^I request the market depth for ([^"]*) with no limit$`, s.requestMarketDepthNoLimit)
+	ctx.Step(`^I request the market depth for ([^"]*) with a limit of (\d+)$`, s.requestMarketDepthWithLimit)
+	ctx.Step(`^I should receive the current order book$`, s.shouldReceiveOrderBook)
+	ctx.Step(`^the order book should contain bid orders$`, s.checkBids)
+	ctx.Step(`^the order book should contain ask orders$`, s.checkAsks)
+	ctx.Step(`^bid orders should be sorted by price descending$`, s.checkBidsSorted)
+	ctx.Step(`^ask orders should be sorted by price ascending$`, s.checkAsksSorted)
+	ctx.Step(`^each price level should have a price and size$`, s.checkPriceLevels)
 
 	// Market prices steps
-	ctx.When(`^I request all market prices$`, s.requestAllPrices)
-	ctx.Then(`^I should receive current prices for all markets$`, s.shouldReceiveAllPrices)
-	ctx.And(`^each market price should include a mark price$`, s.checkMarkPrice)
-	ctx.And(`^each market price should include a mid price$`, s.checkMidPrice)
+	ctx.Step(`^I request all market prices$`, s.requestAllPrices)
+	ctx.Step(`^I should receive current prices for all markets$`, s.shouldReceiveAllPrices)
+	ctx.Step(`^each market price should include a mark price$`, s.checkMarkPrice)
+	ctx.Step(`^each market price should include a mid price$`, s.checkMidPrice)
 
 	// Individual market price steps
-	ctx.When(`^I request the price for ([^"]*)$`, s.requestPrice)
-	ctx.Then(`^I should receive the current ([^"]*) market price$`, s.shouldReceiveMarketPrice)
+	ctx.Step(`^I request the price for ([^"]*)$`, s.requestPrice)
+	ctx.Step(`^I should receive the current ([^"]*) market price$`, s.shouldReceiveMarketPrice)
 
 	// Market trades steps
-	ctx.When(`^I request recent trades for ([^"]*) with default limit$`, s.requestTradesDefault)
-	ctx.Then(`^I should receive a list of recent trades$`, s.shouldReceiveTrades)
-	ctx.And(`^each trade should have a price$`, s.checkTradePrice)
-	ctx.And(`^each trade should have a size$`, s.checkTradeSize)
-	ctx.And(`^each trade should indicate if it was a buy or sell$`, s.checkTradeDirection)
-	ctx.And(`^each trade should have a timestamp$`, s.checkTradeTimestamp)
+	ctx.Step(`^I request recent trades for ([^"]*) with default limit$`, s.requestTradesDefault)
+	ctx.Step(`^I should receive a list of recent trades$`, s.shouldReceiveTrades)
+	ctx.Step(`^each trade should have a price$`, s.checkTradePrice)
+	ctx.Step(`^each trade should have a size$`, s.checkTradeSize)
+	ctx.Step(`^each trade should indicate if it was a buy or sell$`, s.checkTradeDirection)
+	ctx.Step(`^each trade should have a timestamp$`, s.checkTradeTimestamp)
 
 	// Candlestick steps
-	ctx.When(`^I request candlesticks for ([^"]*) with interval ([^"]*)$`, s.requestCandlesticks)
-	ctx.Then(`^I should receive historical candlestick data$`, s.shouldReceiveCandlesticks)
-	ctx.And(`^each candlestick should have an open price$`, s.checkCandlestickOpen)
-	ctx.And(`^each candlestick should have a high price$`, s.checkCandlestickHigh)
-	ctx.And(`^each candlestick should have a low price$`, s.checkCandlestickLow)
-	ctx.And(`^each candlestick should have a close price$`, s.checkCandlestickClose)
-	ctx.And(`^each candlestick should have a volume$`, s.checkCandlestickVolume)
+	ctx.Step(`^I request candlesticks for ([^"]*) with interval ([^"]*)$`, s.requestCandlesticks)
+	ctx.Step(`^I should receive historical candlestick data$`, s.shouldReceiveCandlesticks)
+	ctx.Step(`^each candlestick should have an open price$`, s.checkCandlestickOpen)
+	ctx.Step(`^each candlestick should have a high price$`, s.checkCandlestickHigh)
+	ctx.Step(`^each candlestick should have a low price$`, s.checkCandlestickLow)
+	ctx.Step(`^each candlestick should have a close price$`, s.checkCandlestickClose)
+	ctx.Step(`^each candlestick should have a volume$`, s.checkCandlestickVolume)
 
 	// Market contexts steps
-	ctx.When(`^I request all asset contexts$`, s.requestAssetContexts)
-	ctx.Then(`^I should receive market context data for all markets$`, s.shouldReceiveContexts)
+	ctx.Step(`^I request all asset contexts$`, s.requestAssetContexts)
+	ctx.Step(`^I should receive market context data for all markets$`, s.shouldReceiveContexts)
 }
 
 func (s *MarketDataSteps) givenReadClient() error {
@@ -226,7 +226,7 @@ func (s *MarketDataSteps) requestMarketByName(name string) error {
 		return err
 	}
 
-	s.testWorld.Markets = []model.PerpMarketConfig{*market}
+	s.testWorld.Markets = []models.PerpMarketConfig{*market}
 	return nil
 }
 
@@ -560,7 +560,7 @@ func (s *MarketDataSteps) checkCandlestickOpen() error {
 		return nil
 	}
 	for _, candle := range s.testWorld.Candlesticks {
-		if candle.O <= 0 {
+		if candle.Open <= 0 {
 			return fmt.Errorf("open price should be positive")
 		}
 	}
@@ -572,7 +572,7 @@ func (s *MarketDataSteps) checkCandlestickHigh() error {
 		return nil
 	}
 	for _, candle := range s.testWorld.Candlesticks {
-		if candle.H <= 0 {
+		if candle.High <= 0 {
 			return fmt.Errorf("high price should be positive")
 		}
 	}
@@ -584,7 +584,7 @@ func (s *MarketDataSteps) checkCandlestickLow() error {
 		return nil
 	}
 	for _, candle := range s.testWorld.Candlesticks {
-		if candle.L <= 0 {
+		if candle.Low <= 0 {
 			return fmt.Errorf("low price should be positive")
 		}
 	}
@@ -596,7 +596,7 @@ func (s *MarketDataSteps) checkCandlestickClose() error {
 		return nil
 	}
 	for _, candle := range s.testWorld.Candlesticks {
-		if candle.C <= 0 {
+		if candle.Close <= 0 {
 			return fmt.Errorf("close price should be positive")
 		}
 	}
@@ -608,7 +608,7 @@ func (s *MarketDataSteps) checkCandlestickVolume() error {
 		return nil
 	}
 	for _, candle := range s.testWorld.Candlesticks {
-		if candle.V < 0 {
+		if candle.Volume < 0 {
 			return fmt.Errorf("volume should be non-negative")
 		}
 	}
