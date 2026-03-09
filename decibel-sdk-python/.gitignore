@@ -44,7 +44,10 @@ coverage.xml
 venv/
 env/
 ENV/
-.venv
+.venv/
+
+# uv lock file (for libraries, not applications)
+uv.lock
 
 # IDEs
 .idea/
