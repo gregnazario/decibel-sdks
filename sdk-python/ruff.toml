@@ -1,0 +1,11 @@
+target-version = "py310"
+line-length = 100
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[lint.per-file-ignores]
+"decibel_sdk/models/market.py" = ["E741"]  # API field name `l` (low) is required
+
+[format]
+quote-style = "double"

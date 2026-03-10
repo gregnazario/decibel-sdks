@@ -14,6 +14,18 @@ sdk-kotlin/out/
 sdk-go/vendor/
 sdk-go/coverage.out
 
+# Python
+sdk-python/.venv/
+sdk-python/__pycache__/
+sdk-python/**/__pycache__/
+sdk-python/*.egg-info/
+sdk-python/dist/
+sdk-python/.pytest_cache/
+sdk-python/.mypy_cache/
+sdk-python/.ruff_cache/
+sdk-python/coverage/
+sdk-python/htmlcov/
+
 # IDE
 .idea/
 .vscode/
