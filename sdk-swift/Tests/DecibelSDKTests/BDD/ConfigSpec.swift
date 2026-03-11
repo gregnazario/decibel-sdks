@@ -19,59 +19,59 @@ final class ConfigSpec: QuickSpec {
             context("when using mainnet preset") {
                 it("creates a valid read client") {
                     world.config = .mainnet
-                    expect{ try DecibelReadClient(config: world.config, apiKey: nil) }.notTo(throwError())
+                    expect(DecibelReadClient(config: world.config!, apiKey: nil)).toNot(beNil())
                 }
 
                 it("configures for mainnet environment") {
                     world.config = .mainnet
-                    expect(world.config.network).to(equal(.mainnet))
-                    expect(world.config.tradingHttpUrl).to(equal("https://api.decibel.trade"))
+                    expect(world.config!.network).to(equal(.mainnet))
+                    expect(world.config!.tradingHTTPURL).to(equal("https://api.decibel.trade"))
                 }
 
                 it("has correct chain ID") {
                     world.config = .mainnet
-                    expect(world.config.chainId).to(equal(1))
+                    expect(world.config!.chainID).to(equal(1))
                 }
 
                 it("has valid deployment addresses") {
                     world.config = .mainnet
-                    expect(world.config.deployment.package).toNot(beEmpty())
+                    expect(world.config!.deployment.package_addr).toNot(beEmpty())
                 }
             }
 
             context("when using testnet preset") {
                 it("creates a valid read client") {
                     world.config = .testnet
-                    expect{ try DecibelReadClient(config: world.config, apiKey: nil) }.notTo(throwError())
+                    expect(DecibelReadClient(config: world.config!, apiKey: nil)).toNot(beNil())
                 }
 
                 it("configures for testnet environment") {
                     world.config = .testnet
-                    expect(world.config.network).to(equal(.testnet))
-                    expect(world.config.tradingHttpUrl).to(equal("https://api.testnet.decibel.trade"))
+                    expect(world.config!.network).to(equal(.testnet))
+                    expect(world.config!.tradingHTTPURL).to(equal("https://api.testnet.decibel.trade"))
                 }
 
                 it("has correct chain ID") {
                     world.config = .testnet
-                    expect(world.config.chainId).to(equal(2))
+                    expect(world.config!.chainID).to(equal(2))
                 }
             }
 
             context("when using local preset") {
                 it("creates a valid read client") {
                     world.config = .local
-                    expect{ try DecibelReadClient(config: world.config, apiKey: nil) }.notTo(throwError())
+                    expect(DecibelReadClient(config: world.config!, apiKey: nil)).toNot(beNil())
                 }
 
                 it("configures for local environment") {
                     world.config = .local
-                    expect(world.config.network).to(equal(.local))
-                    expect(world.config.tradingHttpUrl).to(equal("http://localhost:3000"))
+                    expect(world.config!.network).to(equal(.local))
+                    expect(world.config!.tradingHTTPURL).to(equal("http://localhost:3000"))
                 }
 
                 it("has correct chain ID") {
                     world.config = .local
-                    expect(world.config.chainId).to(equal(4))
+                    expect(world.config!.chainID).to(equal(4))
                 }
             }
 
@@ -103,24 +103,39 @@ final class ConfigSpec: QuickSpec {
             context("configuration validation") {
                 it("validates correct configuration") {
                     world.config = .testnet
-                    expect{ world.config?.validate() }.notTo(throwError())
+                    expect{ try world.config?.validate() }.notTo(throwError())
                 }
 
                 it("fails validation for missing fullnode URL") {
-                    var config = DecibelConfig.testnet
-                    config.fullnodeUrl = ""
+                    let config = DecibelConfig(
+                        network: .testnet,
+                        fullnodeURL: "",
+                        tradingHTTPURL: "https://api.testnet.decibel.trade",
+                        tradingWsURL: "wss://api.testnet.decibel.trade/ws",
+                        deployment: Deployment(package_addr: "0x1", usdc: "0x2")
+                    )
                     expect{ try config.validate() }.to(throwError())
                 }
 
                 it("fails validation for missing trading HTTP URL") {
-                    var config = DecibelConfig.testnet
-                    config.tradingHttpUrl = ""
+                    let config = DecibelConfig(
+                        network: .testnet,
+                        fullnodeURL: "https://fullnode.testnet.aptoslabs.com/v1",
+                        tradingHTTPURL: "",
+                        tradingWsURL: "wss://api.testnet.decibel.trade/ws",
+                        deployment: Deployment(package_addr: "0x1", usdc: "0x2")
+                    )
                     expect{ try config.validate() }.to(throwError())
                 }
 
                 it("fails validation for missing trading WebSocket URL") {
-                    var config = DecibelConfig.testnet
-                    config.tradingWsUrl = ""
+                    let config = DecibelConfig(
+                        network: .testnet,
+                        fullnodeURL: "https://fullnode.testnet.aptoslabs.com/v1",
+                        tradingHTTPURL: "https://api.testnet.decibel.trade",
+                        tradingWsURL: "",
+                        deployment: Deployment(package_addr: "0x1", usdc: "0x2")
+                    )
                     expect{ try config.validate() }.to(throwError())
                 }
             }

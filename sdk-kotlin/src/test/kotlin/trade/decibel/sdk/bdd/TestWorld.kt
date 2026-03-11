@@ -14,7 +14,6 @@ class TestWorld {
 
     // Clients
     var readClient: DecibelReadClient? = null
-    var writeClient: DecibelWriteClient? = null
 
     // Error state
     var lastError: Throwable? = null
@@ -60,7 +59,6 @@ class TestWorld {
     fun clear() {
         config = null
         readClient = null
-        writeClient = null
         lastError = null
         markets = null
         marketDepth = null
@@ -95,7 +93,7 @@ class TestWorld {
     /**
      * Returns the read client, initializing if necessary.
      */
-    fun getReadClient(): DecibelReadClient {
+    fun getOrCreateReadClient(): DecibelReadClient {
         if (readClient == null) {
             if (config == null) {
                 config = DecibelConfig.TESTNET

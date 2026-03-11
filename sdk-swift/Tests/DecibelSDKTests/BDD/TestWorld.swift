@@ -9,7 +9,6 @@ class TestWorld {
 
     // Clients
     var readClient: DecibelReadClient?
-    var writeClient: DecibelWriteClient?
 
     // Error state
     var lastError: Error?
@@ -53,7 +52,6 @@ class TestWorld {
     func clear() {
         config = nil
         readClient = nil
-        writeClient = nil
         lastError = nil
         markets.removeAll()
         marketDepth = nil
@@ -86,12 +84,12 @@ class TestWorld {
     }
 
     /// Returns the read client, initializing if necessary.
-    func getReadClient() throws -> DecibelReadClient {
+    func getReadClient() -> DecibelReadClient {
         if readClient == nil {
             if config == nil {
                 config = .testnet
             }
-            readClient = try DecibelReadClient(config: config!, apiKey: apiKey)
+            readClient = DecibelReadClient(config: config!, apiKey: apiKey)
         }
         return readClient!
     }
