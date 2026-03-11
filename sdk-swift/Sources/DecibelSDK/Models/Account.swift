@@ -93,3 +93,117 @@ public struct LeaderboardItem: Codable {
         case roi, volume
     }
 }
+
+public typealias LeaderboardEntry = LeaderboardItem
+
+public struct UserFundHistoryItem: Codable {
+    public let amount: Double
+    public let isDeposit: Bool
+    public let transactionUnixMs: Int64
+    public let transactionVersion: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case amount
+        case isDeposit = "is_deposit"
+        case transactionUnixMs = "transaction_unix_ms"
+        case transactionVersion = "transaction_version"
+    }
+}
+
+public struct UserFundingHistoryItem: Codable {
+    public let market: String
+    public let fundingRateBps: Double
+    public let isFundingPositive: Bool
+    public let fundingAmount: Double
+    public let positionSize: Double
+    public let transactionUnixMs: Int64
+    public let transactionVersion: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case market
+        case fundingRateBps = "funding_rate_bps"
+        case isFundingPositive = "is_funding_positive"
+        case fundingAmount = "funding_amount"
+        case positionSize = "position_size"
+        case transactionUnixMs = "transaction_unix_ms"
+        case transactionVersion = "transaction_version"
+    }
+}
+
+public struct UserTradeHistoryItem: Codable {
+    public let account: String
+    public let market: String
+    public let action: String
+    public let size: Double
+    public let price: Double
+    public let isProfit: Bool
+    public let realizedPnlAmount: Double
+    public let isFundingPositive: Bool
+    public let realizedFundingAmount: Double
+    public let isRebate: Bool
+    public let feeAmount: Double
+    public let transactionUnixMs: Int64
+    public let transactionVersion: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case account, market, action, size, price
+        case isProfit = "is_profit"
+        case realizedPnlAmount = "realized_pnl_amount"
+        case isFundingPositive = "is_funding_positive"
+        case realizedFundingAmount = "realized_funding_amount"
+        case isRebate = "is_rebate"
+        case feeAmount = "fee_amount"
+        case transactionUnixMs = "transaction_unix_ms"
+        case transactionVersion = "transaction_version"
+    }
+}
+
+public struct VaultPerformance: Codable {
+    public let vaultAddress: String
+    public let vaultName: String
+    public let userDeposits: Double
+    public let userShares: Double
+    public let userPnl: Double
+    public let userReturnValue: Double
+
+    enum CodingKeys: String, CodingKey {
+        case vaultAddress = "vault_address"
+        case vaultName = "vault_name"
+        case userDeposits = "user_deposits"
+        case userShares = "user_shares"
+        case userPnl = "user_pnl"
+        case userReturnValue = "user_return_value"
+    }
+}
+
+public struct UserTwapHistoryItem: Codable {
+    public let market: String
+    public let isBuy: Bool
+    public let orderId: String
+    public let clientOrderId: String
+    public let isReduceOnly: Bool
+    public let startUnixMs: Int64
+    public let frequencyS: Int64
+    public let durationS: Int64
+    public let origSize: Double
+    public let executedSize: Double
+    public let status: String
+    public let transactionUnixMs: Int64
+    public let transactionVersion: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case market
+        case isBuy = "is_buy"
+        case orderId = "order_id"
+        case clientOrderId = "client_order_id"
+        case isReduceOnly = "is_reduce_only"
+        case startUnixMs = "start_unix_ms"
+        case frequencyS = "frequency_s"
+        case durationS = "duration_s"
+        case origSize = "orig_size"
+        case executedSize = "executed_size"
+        case status
+        case transactionUnixMs = "transaction_unix_ms"
+        case transactionVersion = "transaction_version"
+    }
+}
