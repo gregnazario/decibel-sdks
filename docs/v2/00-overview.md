@@ -120,5 +120,5 @@ Decibel is a fully on-chain perpetual futures exchange on Aptos:
 | **Error handling** | Type hierarchy | Structured errors with retry hints and position safety flags |
 | **Funding** | Raw fields | Computed impact on PnL and liquidation distance |
 | **Fee model** | Not specified | Fee schedule, builder fees, fee estimation |
-| **Orderbook** | Snapshot only | Managed local orderbook with incremental updates |
+| **Orderbook** | Snapshot only | Managed local full-depth orderbook from snapshots (no incremental deltas) |
 | **Testing** | Unit + integration | Unit + integration + property + agent scenario + backtest |

@@ -31,7 +31,8 @@ jobs:
         run: ruff check decibel/ tests/
 
       - name: Type check
-        run: mypy decibel/ --ignore-missing-imports || true
+        continue-on-error: true
+        run: mypy decibel/ --ignore-missing-imports
 
       - name: Run tests with coverage
         run: |

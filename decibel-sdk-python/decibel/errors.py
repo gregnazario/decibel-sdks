@@ -70,6 +70,8 @@ class DecibelError(Exception):
             "code": self.code,
             "message": self.message,
             "position_safety": self.position_safety.value,
+            "is_retryable": self.is_retryable,
+            "retry_after_ms": self.retry_after_ms,
         }
 
     def to_json(self) -> str:

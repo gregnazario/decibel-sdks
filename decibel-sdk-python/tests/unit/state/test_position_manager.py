@@ -318,12 +318,12 @@ class TestAccountOverview:
         assert mgr.equity(SUBACCOUNT) == pytest.approx(42_000.0)
 
     def test_margin_usage_pct(self, mgr: PositionStateManager):
-        """margin_usage_pct is total_margin / perp_equity_balance * 100."""
+        """margin_usage_pct is total_margin / perp_equity_balance as 0.0-1.0 fraction."""
         mgr.merge_overview(
             _make_overview(equity=100_000.0, total_margin=20_000.0),
             SUBACCOUNT,
         )
-        assert mgr.margin_usage_pct(SUBACCOUNT) == pytest.approx(20.0)
+        assert mgr.margin_usage_pct(SUBACCOUNT) == pytest.approx(0.20)
 
     def test_available_margin(self, mgr: PositionStateManager):
         """available_margin is equity minus total_margin."""

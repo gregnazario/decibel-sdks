@@ -10,6 +10,12 @@ def amount_to_chain_units(amount: float, *, decimals: int) -> int:
     """Convert a decimal amount to integer chain units.
 
     Example: amount_to_chain_units(5.67, decimals=9) == 5_670_000_000
+
+    Note:
+        Uses ``round(float * 10**decimals)`` which is sufficient for
+        Decibel's precision requirements.  If deterministic rounding
+        across platforms is needed (e.g. matching on-chain settlement
+        exactly), convert via ``Decimal`` before rounding.
     """
     return int(round(amount * (10 ** decimals)))
 

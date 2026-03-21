@@ -54,8 +54,8 @@ class PerpMarketConfig(BaseModel):
 
     @property
     def mm_fraction(self) -> float:
-        """Margin call fee as a fraction (margin_call_fee_pct / 100)."""
-        return self.margin_call_fee_pct / 100.0
+        """Margin call fee as a fraction (e.g., 0.005 for 0.5%)."""
+        return self.margin_call_fee_pct
 
 
 class MarketOrder(BaseModel):
@@ -104,19 +104,27 @@ class MarketDepth(BaseModel):
         return (a + b) / 2 if b is not None and a is not None else None
 
     def bid_depth_at(self, percent_from_mid: float) -> float:
-        """Total bid size within percent_from_mid% of mid price."""
+        """Total bid size within a fractional distance of the mid price.
+
+        Args:
+            percent_from_mid: Fractional distance where 0.01 = 1%, 0.05 = 5%.
+        """
         mid = self.mid_price
         if mid is None:
             return 0.0
-        threshold = mid * (1 - percent_from_mid / 100)
+        threshold = mid * (1 - percent_from_mid)
         return sum(level.size for level in self.bids if level.price >= threshold)
 
     def ask_depth_at(self, percent_from_mid: float) -> float:
-        """Total ask size within percent_from_mid% of mid price."""
+        """Total ask size within a fractional distance of the mid price.
+
+        Args:
+            percent_from_mid: Fractional distance where 0.01 = 1%, 0.05 = 5%.
+        """
         mid = self.mid_price
         if mid is None:
             return 0.0
-        threshold = mid * (1 + percent_from_mid / 100)
+        threshold = mid * (1 + percent_from_mid)
         return sum(level.size for level in self.asks if level.price <= threshold)
 
     @property

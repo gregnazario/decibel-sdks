@@ -292,7 +292,7 @@ def btc_perp_config() -> PerpMarketConfig:
         lot_size=0.0001,
         tick_size=0.1,
         max_open_interest=500.0,
-        margin_call_fee_pct=0.5,
+        margin_call_fee_pct=0.005,
         taker_in_next_block=True,
     )
 

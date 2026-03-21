@@ -81,7 +81,7 @@ class AccountOverview(BaseModel):
     @property
     def is_liquidation_warning(self) -> bool:
         """True if liquidation buffer is below 10% of equity."""
-        return self.liquidation_buffer_pct < 0.10
+        return self.liquidation_buffer_pct <= 0.10
 
     @property
     def total_withdrawable(self) -> float:
@@ -181,8 +181,8 @@ class UserPosition(BaseModel):
 
     @property
     def has_protection(self) -> bool:
-        """True if position has both TP and SL."""
-        return self.has_tp and self.has_sl
+        """True if position has TP or SL."""
+        return self.has_tp or self.has_sl
 
 
 class UserOpenOrder(BaseModel):

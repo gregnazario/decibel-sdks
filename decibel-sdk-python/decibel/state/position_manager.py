@@ -16,7 +16,7 @@ class PositionStateManager:
     """
 
     def __init__(self) -> None:
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._positions: dict[str, dict[str, UserPosition]] = {}
         self._open_orders: dict[str, dict[str, UserOpenOrder]] = {}
         self._overviews: dict[str, AccountOverview] = {}
@@ -78,13 +78,15 @@ class PositionStateManager:
 
     # ----- open orders -----
 
+    TERMINAL_STATUSES = {"Cancelled", "Canceled", "Filled", "Expired", "Rejected"}
+
     def merge_open_orders(self, orders: list[UserOpenOrder], subaccount: str) -> None:
         with self._lock:
             if subaccount not in self._open_orders:
                 self._open_orders[subaccount] = {}
             store = self._open_orders[subaccount]
             for order in orders:
-                if order.status == "Cancelled":
+                if order.status in self.TERMINAL_STATUSES:
                     store.pop(order.order_id, None)
                 else:
                     store[order.order_id] = order
@@ -131,11 +133,12 @@ class PositionStateManager:
             return ov.perp_equity_balance if ov else 0.0
 
     def margin_usage_pct(self, subaccount: str) -> float:
+        """Return margin usage as a 0.0-1.0 fraction, matching AccountOverview."""
         with self._lock:
             ov = self._overviews.get(subaccount)
             if not ov or ov.perp_equity_balance == 0:
                 return 0.0
-            return (ov.total_margin / ov.perp_equity_balance) * 100
+            return ov.total_margin / ov.perp_equity_balance
 
     def available_margin(self, subaccount: str) -> float:
         with self._lock:

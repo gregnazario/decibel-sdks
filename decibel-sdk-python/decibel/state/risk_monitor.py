@@ -64,8 +64,8 @@ class RiskMonitor:
     def margin_warning(
         self,
         subaccount: str,
-        warn_threshold: float = 80.0,
-        critical_threshold: float = 90.0,
+        warn_threshold: float = 0.80,
+        critical_threshold: float = 0.90,
     ) -> str | None:
         ov = self._state.overview(subaccount)
         if ov is None:
@@ -101,7 +101,7 @@ class RiskMonitor:
         positions = self._state.positions(subaccount)
         return [
             pos for pos in positions.values()
-            if not (pos.tp_order_id and pos.sl_order_id)
+            if not pos.tp_order_id and not pos.sl_order_id
         ]
 
     def unprotected_exposure_usd(self, subaccount: str) -> float:
