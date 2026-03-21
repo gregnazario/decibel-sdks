@@ -13,7 +13,7 @@ from decibel.models.account import (
     UserSubaccount,
     UserTradeHistoryItem,
 )
-from decibel.models.common import PageParams, PaginatedResponse, PlaceOrderResult, SearchTermParams, SortParams, TwapOrderResult
+from decibel.models.common import PageParams, PaginatedResponse, PlaceOrderResult, SearchTermParams, SortParams, TransactionResult, TwapOrderResult
 from decibel.models.enums import (
     CandlestickInterval,
     MarketDepthAggregationSize,
@@ -37,6 +37,7 @@ __all__ = [
     "PaginatedResponse",
     "PlaceOrderResult",
     "TwapOrderResult",
+    "TransactionResult",
     # Enums
     "TimeInForce",
     "CandlestickInterval",

@@ -56,6 +56,34 @@ class AccountOverview(BaseModel):
     liquidation_fees_paid: float | None = None
     liquidation_losses: float | None = None
 
+    @property
+    def margin_usage_pct(self) -> float:
+        """Percentage of equity used as margin."""
+        if self.perp_equity_balance == 0:
+            return 0.0
+        return (self.total_margin / self.perp_equity_balance) * 100
+
+    @property
+    def liquidation_buffer_usd(self) -> float:
+        """USD buffer above maintenance margin."""
+        return self.perp_equity_balance - self.maintenance_margin
+
+    @property
+    def liquidation_buffer_pct(self) -> float:
+        """Percentage buffer above maintenance margin."""
+        if self.maintenance_margin == 0:
+            return float('inf')
+        return (self.perp_equity_balance / self.maintenance_margin - 1) * 100
+
+    def is_liquidation_warning(self, threshold_pct: float = 50.0) -> bool:
+        """True if buffer is below threshold_pct."""
+        return self.liquidation_buffer_pct < threshold_pct
+
+    @property
+    def total_withdrawable(self) -> float:
+        """Total withdrawable USDC."""
+        return self.usdc_cross_withdrawable_balance + self.usdc_isolated_withdrawable_balance
+
 
 class UserPosition(BaseModel):
     """User's position in a market.
@@ -94,6 +122,62 @@ class UserPosition(BaseModel):
     sl_trigger_price: float | None = None
     sl_limit_price: float | None = None
 
+    @property
+    def is_long(self) -> bool:
+        return self.size > 0
+
+    @property
+    def is_short(self) -> bool:
+        return self.size < 0
+
+    @property
+    def is_flat(self) -> bool:
+        return self.size == 0
+
+    @property
+    def direction(self) -> str:
+        if self.size > 0: return "long"
+        if self.size < 0: return "short"
+        return "flat"
+
+    def notional(self, mark_price: float) -> float:
+        """Position notional at given mark price."""
+        return abs(self.size) * mark_price
+
+    def unrealized_pnl(self, mark_price: float) -> float:
+        """Unrealized PnL excluding funding."""
+        return (mark_price - self.entry_price) * self.size
+
+    def unrealized_pnl_pct(self, mark_price: float) -> float:
+        """Unrealized PnL as % of entry notional."""
+        entry_notional = abs(self.size) * self.entry_price
+        if entry_notional == 0:
+            return 0.0
+        return self.unrealized_pnl(mark_price) / entry_notional * 100
+
+    def total_unrealized_pnl(self, mark_price: float) -> float:
+        """Unrealized PnL including funding."""
+        return self.unrealized_pnl(mark_price) + self.unrealized_funding
+
+    def liquidation_distance_pct(self, mark_price: float) -> float:
+        """Percentage distance from current price to estimated liquidation."""
+        if self.estimated_liquidation_price == 0 or mark_price == 0:
+            return float('inf')
+        return abs(mark_price - self.estimated_liquidation_price) / mark_price * 100
+
+    @property
+    def has_tp(self) -> bool:
+        return self.tp_order_id is not None
+
+    @property
+    def has_sl(self) -> bool:
+        return self.sl_order_id is not None
+
+    @property
+    def has_protection(self) -> bool:
+        """True if position has both TP and SL."""
+        return self.has_tp and self.has_sl
+
 
 class UserOpenOrder(BaseModel):
     """Active open order.
@@ -125,6 +209,29 @@ class UserOpenOrder(BaseModel):
     transaction_unix_ms: int
     transaction_version: int
     client_order_id: str | None = None
+
+    @property
+    def filled_size(self) -> float:
+        return self.orig_size - self.remaining_size
+
+    @property
+    def fill_pct(self) -> float:
+        if self.orig_size == 0:
+            return 0.0
+        return (self.filled_size / self.orig_size) * 100
+
+    @property
+    def side(self) -> str:
+        return "buy" if self.is_buy else "sell"
+
+    @property
+    def notional(self) -> float:
+        """Remaining notional = remaining_size * price."""
+        return self.remaining_size * self.price
+
+    def age_ms(self, now_ms: int) -> int:
+        """Milliseconds since order was placed."""
+        return now_ms - self.transaction_unix_ms
 
 
 class UserOrderHistoryItem(BaseModel):
@@ -191,6 +298,24 @@ class UserTradeHistoryItem(BaseModel):
     fee_amount: float
     transaction_unix_ms: int
     transaction_version: int
+
+    @property
+    def net_pnl(self) -> float:
+        """Net PnL after fees and funding.
+
+        If is_rebate is True, fee_amount is added (maker rebate).
+        Otherwise fee_amount is subtracted.
+        """
+        pnl = self.realized_pnl_amount + self.realized_funding_amount
+        if self.is_rebate:
+            pnl += self.fee_amount
+        else:
+            pnl -= self.fee_amount
+        return pnl
+
+    @property
+    def notional(self) -> float:
+        return self.size * self.price
 
 
 class UserFundingHistoryItem(BaseModel):
