@@ -278,7 +278,11 @@ class TestOrderTracking:
         assert mgr.order_by_client_id("missing", SUBACCOUNT) is None
 
     def test_order_removal_on_cancel(self, mgr: PositionStateManager):
-        """Cancelled orders are removed from the open set on merge."""
+        """Cancelled orders are removed from the open set on merge.
+
+        After merging a cancellation for o1, the open orders list should
+        only contain o2. A cancelled order is not an open order.
+        """
         mgr.merge_open_orders(
             [_make_open_order(order_id="o1"), _make_open_order(order_id="o2")],
             SUBACCOUNT,
@@ -288,7 +292,10 @@ class TestOrderTracking:
             SUBACCOUNT,
         )
         remaining = mgr.open_orders(SUBACCOUNT)
-        assert all(o.order_id != "o1" or o.status == "Cancelled" for o in remaining)
+        remaining_ids = [o.order_id for o in remaining]
+        assert "o1" not in remaining_ids, "Cancelled order o1 should be removed from open orders"
+        assert "o2" in remaining_ids, "Non-cancelled order o2 should remain in open orders"
+        assert len(remaining) == 1, f"Expected 1 open order after cancel, got {len(remaining)}"
 
 
 # ===================================================================

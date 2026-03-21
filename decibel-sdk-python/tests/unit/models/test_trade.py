@@ -16,7 +16,10 @@ from decibel.models.account import (
 )
 from decibel.models.enums import TradeAction
 
-from tests.conftest import NOW_MS, BTC_MARKET_ADDR, PRIMARY_ADDR
+from tests.conftest import NOW_MS
+
+BTC_MARKET_ADDR = "0xabc123"
+PRIMARY_ADDR = "0xsub1"
 
 
 # ===================================================================

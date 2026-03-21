@@ -571,3 +571,69 @@ def btc_trade_history_item() -> UserTradeHistoryItem:
         transaction_unix_ms=NOW_MS,
         transaction_version=100_003,
     )
+
+
+@pytest.fixture
+def user_trade_history_item() -> UserTradeHistoryItem:
+    """Closed-long trade for test_trade.py: 0.5 BTC @ $96,000.
+
+    net_pnl = realized_pnl(1000) + funding(5) - fee(24) = 981.0
+    notional = 0.5 * 96000 = 48000.0
+    """
+    return UserTradeHistoryItem(
+        account="0xsub1",
+        market="0xabc123",
+        action=TradeAction.CLOSE_LONG,
+        size=0.5,
+        price=96_000.0,
+        is_profit=True,
+        realized_pnl_amount=1_000.0,
+        is_funding_positive=True,
+        realized_funding_amount=5.0,
+        is_rebate=False,
+        fee_amount=24.0,
+        transaction_unix_ms=NOW_MS,
+        transaction_version=1_000_010,
+    )
+
+
+@pytest.fixture
+def user_funding_history_item():
+    """Funding payment: 0.75 bps, $12.50, positive (longs pay)."""
+    from decibel.models.account import UserFundingHistoryItem
+
+    return UserFundingHistoryItem(
+        market="0xabc123",
+        funding_rate_bps=0.75,
+        is_funding_positive=True,
+        funding_amount=12.50,
+        position_size=0.5,
+        transaction_unix_ms=NOW_MS,
+        transaction_version=1_000_020,
+    )
+
+
+@pytest.fixture
+def user_fund_history_deposit():
+    """Deposit of $10,000 USDC."""
+    from decibel.models.account import UserFundHistoryItem
+
+    return UserFundHistoryItem(
+        amount=10_000.0,
+        is_deposit=True,
+        transaction_unix_ms=NOW_MS,
+        transaction_version=1_000_030,
+    )
+
+
+@pytest.fixture
+def user_fund_history_withdrawal():
+    """Withdrawal of $2,500 USDC."""
+    from decibel.models.account import UserFundHistoryItem
+
+    return UserFundHistoryItem(
+        amount=2_500.0,
+        is_deposit=False,
+        transaction_unix_ms=NOW_MS,
+        transaction_version=1_000_031,
+    )

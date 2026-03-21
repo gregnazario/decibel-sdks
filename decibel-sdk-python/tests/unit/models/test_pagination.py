@@ -40,17 +40,23 @@ class TestPageParams:
         assert params.limit == 50
         assert params.offset == 200
 
-    def test_page_params_roundtrip(self, custom_page_params: PageParams) -> None:
-        """Serialise → deserialise roundtrip."""
-        data = custom_page_params.model_dump()
+    def test_page_params_roundtrip(self) -> None:
+        """Serialise → deserialise roundtrip preserves custom values."""
+        params = PageParams(limit=50, offset=200)
+        data = params.model_dump()
         restored = PageParams(**data)
-        assert restored == custom_page_params
+        assert restored.limit == 50
+        assert restored.offset == 200
+        assert restored == params
 
-    def test_page_params_json_roundtrip(self, custom_page_params: PageParams) -> None:
-        """JSON roundtrip."""
-        json_str = custom_page_params.model_dump_json()
+    def test_page_params_json_roundtrip(self) -> None:
+        """JSON roundtrip preserves custom values."""
+        params = PageParams(limit=50, offset=200)
+        json_str = params.model_dump_json()
         restored = PageParams.model_validate_json(json_str)
-        assert restored == custom_page_params
+        assert restored.limit == 50
+        assert restored.offset == 200
+        assert restored == params
 
     def test_page_params_limit_min(self) -> None:
         """limit must be >= 1."""
@@ -96,17 +102,29 @@ class TestSortParams:
         assert params.sort_key == "transaction_unix_ms"
         assert params.sort_dir == SortDirection.DESCENDING
 
-    def test_sort_params_roundtrip(self, desc_sort_params: SortParams) -> None:
-        """Serialise → deserialise roundtrip."""
-        data = desc_sort_params.model_dump()
+    def test_sort_params_roundtrip(self) -> None:
+        """Serialise → deserialise roundtrip preserves sort key and direction."""
+        params = SortParams(
+            sort_key="transaction_unix_ms",
+            sort_dir=SortDirection.DESCENDING,
+        )
+        data = params.model_dump()
         restored = SortParams(**data)
-        assert restored == desc_sort_params
+        assert restored.sort_key == "transaction_unix_ms"
+        assert restored.sort_dir == SortDirection.DESCENDING
+        assert restored == params
 
-    def test_sort_params_json_roundtrip(self, desc_sort_params: SortParams) -> None:
-        """JSON roundtrip."""
-        json_str = desc_sort_params.model_dump_json()
+    def test_sort_params_json_roundtrip(self) -> None:
+        """JSON roundtrip preserves sort key and direction."""
+        params = SortParams(
+            sort_key="transaction_unix_ms",
+            sort_dir=SortDirection.DESCENDING,
+        )
+        json_str = params.model_dump_json()
         restored = SortParams.model_validate_json(json_str)
-        assert restored == desc_sort_params
+        assert restored.sort_key == "transaction_unix_ms"
+        assert restored.sort_dir == SortDirection.DESCENDING
+        assert restored == params
 
     def test_sort_params_ascending(self) -> None:
         """Ascending sort direction."""
