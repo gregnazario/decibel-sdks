@@ -1,11 +1,22 @@
 # Scratchpad
 
-## Task: Add computed properties to Pydantic models in Decibel SDK
+## Status: COMPLETE
 
-### Status: Complete
+## Completed Tasks
 
-### Changes Made
-1. **market.py** - Added computed properties to `PerpMarketConfig`, `MarketDepth`, `MarketPrice`, and `Candlestick`. Added `model_config = ConfigDict(populate_by_name=True)` to `PerpMarketConfig`. Added `ConfigDict` to pydantic import.
-2. **account.py** - Added computed properties to `AccountOverview`, `UserPosition`, `UserOpenOrder`, and `UserTradeHistoryItem`.
-3. **common.py** - Added `TransactionResult` class.
-4. **__init__.py** - Exported `TransactionResult` from models package.
+### Package 1: `decibel/state/`
+- `position_manager.py` — PositionStateManager: thread-safe in-memory cache for positions, orders, overviews, market data
+- `order_tracker.py` — OrderLifecycleTracker with OrderState enum, callbacks, history
+- `risk_monitor.py` — RiskMonitor with liquidation distance, margin warnings, funding accrual, unprotected positions
+- `__init__.py` — exports all three classes
+
+### Package 2: `decibel/bulk/`
+- `order_manager.py` — BulkOrderManager with BulkQuoteResult, FillSummary models
+- `__init__.py` — exports all three classes
+
+## Test Results
+All 77 tests passing:
+- 12 order tracker tests
+- 36 position manager tests  
+- 15 risk monitor tests
+- 14 bulk order manager tests
