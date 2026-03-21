@@ -1,26 +1,19 @@
-# SCRATCHPAD
+# Scratchpad
 
-## Status: Complete
+## Task: Rewrite docs/v2/04-rust-sdk.md
 
-## Completed Tasks
+**Status**: Complete
 
-- [x] Fetched and analyzed docs.decibel.trade API reference (REST, WebSocket, on-chain, TypeScript SDK)
-- [x] Explored existing repo structure (v1 specification, 5 SDK implementations)
-- [x] Created v2 specification docs under `docs/v2/`
-- [x] Wrote 11 specification documents covering all SDK aspects
+Rewrote the Rust SDK specification (04-rust-sdk.md) from 936 lines to 1603 lines, focusing on high-performance production trading. Key sections added/rewritten:
 
-## V2 Specification Documents
+1. Zero-allocation hot paths — `#[serde(borrow)]` zero-copy WS deserialization, `BufferPool`, `HotOrderParams` as Copy type
+2. PositionStateManager — full API with `Arc<RwLock<>>`, reader/writer methods, `ComputedRiskMetrics`, `recompute_risk()`
+3. BulkOrderManager — atomic `replace_quotes()`, `FillTracker`, sequence numbers via `AtomicU64`, `LiveOrder` lifecycle
+4. Lock-free patterns — pattern guide table, `Arc<RwLock<>>` for read-heavy state, `tokio::mpsc` for events
+5. Transaction building as pure function — `build_transaction()` and `sign_transaction()` take inputs, return bytes
+6. Deterministic latency — `HotPathBuffers`, `LatencyHistogram` with p50/p99/p999, `HotPathMetrics`
+7. Real market making example — full async loop with inventory skew, risk checks, fill handling
+8. Benchmark specifications — table of 10 required benchmarks with target latencies, criterion implementation
+9. Trading-specific error handling — `PositionSafety` enum, `requires_resync()`, `requires_halt()`, `SequenceGap` variant
 
-| Document | Description |
-|---|---|
-| `docs/v2/00-overview.md` | V2 SDK overview, target languages, document index |
-| `docs/v2/01-design-principles.md` | Agent-first design principles (structured data, self-documenting, errors, performance) |
-| `docs/v2/02-structured-data-models.md` | All data types, enums, and schemas |
-| `docs/v2/03-python-sdk.md` | Python SDK specification (Pydantic, async, idiomatic) |
-| `docs/v2/04-rust-sdk.md` | Rust SDK specification (serde, tokio, idiomatic) |
-| `docs/v2/05-rest-api.md` | REST API client specification with full endpoint catalog |
-| `docs/v2/06-websocket-api.md` | WebSocket streaming specification with topics and lifecycle |
-| `docs/v2/07-transaction-builder.md` | On-chain transaction builder (sync build, signing, submission) |
-| `docs/v2/08-error-handling.md` | Error taxonomy, recovery patterns, observability |
-| `docs/v2/09-performance.md` | Performance targets, caching, benchmarks |
-| `docs/v2/10-agent-patterns.md` | Agent integration patterns (7 patterns + anti-patterns) |
+Kept: crate structure, dependencies (added dashmap + crossbeam-channel), testing, configuration, observability.
