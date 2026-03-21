@@ -2,89 +2,89 @@
 
 **Version**: 2.0.0  
 **Date**: 2026-03-21  
-**Target Languages**: Python, Rust  
-**Paradigm**: Agent-First  
+**Target Languages**: Python, Rust, Go (future)  
+**Paradigm**: Trading Bot & Agentic Trading First  
 **Reference**: [docs.decibel.trade](https://docs.decibel.trade) and `@decibeltrade/sdk` v0.3.1 (TypeScript)
 
 ---
 
 ## What Is This
 
-This specification defines two SDKs — one in Python, one in Rust — for the Decibel on-chain perpetual futures exchange on Aptos. Unlike the v1 specification which targeted human developers building interactive UIs, v2 is designed **for AI agents first**: autonomous programs that read market state, make decisions, and execute trades without human intervention in the loop.
+This specification defines SDKs for the Decibel on-chain perpetual futures exchange on Aptos. The primary consumers are **trading bots** and **AI agents** — autonomous programs that monitor markets, manage risk, and execute trades without human involvement.
 
-## Why Agent-First
+The specification covers three languages in priority order:
 
-AI agents are the fastest-growing consumer of trading APIs. They differ from human developers in critical ways:
+1. **Python** — for AI/ML agents, strategy prototyping, data pipelines, and medium-frequency trading
+2. **Rust** — for latency-critical market making, HFT, co-located infrastructure, and production trading systems
+3. **Go** — (future) for high-concurrency server infrastructure, API gateways, and microservice-based trading architectures
 
-| Concern | Human Developer | AI Agent |
+## Who This Is For
+
+This SDK is **not** designed for humans clicking buttons in a UI. It is designed for:
+
+- **Market making bots** that atomically quote bid/ask spreads using bulk orders, manage inventory, and react to fills in sub-second loops
+- **Directional trading agents** (AI or algorithmic) that consume price feeds, compute signals, and execute via TWAP or limit orders
+- **Risk management systems** that monitor positions, margin ratios, funding accrual, and liquidation proximity — triggering protective actions automatically
+- **Vault management agents** that allocate capital across strategies, rebalance positions, and report performance
+- **Arbitrage systems** that detect and act on cross-venue price dislocations
+- **Infrastructure** that aggregates market data, provides execution routing, or wraps Decibel for higher-level trading platforms
+
+## What Matters for Bots
+
+The v2 SDK is shaped by the realities of what bots need:
+
+| Concern | Why It Matters | How v2 Addresses It |
 |---|---|---|
-| **Discovery** | Reads docs, browses examples | Inspects schemas, enumerates capabilities |
-| **Error recovery** | Reads stack traces, debugs | Needs structured errors with retry hints |
-| **Data format** | Flexible — can parse anything | Needs strongly-typed, self-describing data |
-| **Performance** | Tolerates latency in UI | Microseconds matter in decision loops |
-| **Composition** | Writes bespoke glue code | Chains atomic operations programmatically |
-| **Observability** | Checks logs manually | Needs machine-readable metrics and traces |
-
-The v2 SDK is built around these realities.
-
-## Target Languages
-
-### Python
-
-Python is the primary language for AI/ML agents, trading bots, and data pipelines. The v2 Python SDK uses:
-
-- **Pydantic v2** for all data models (JSON Schema generation, validation, serialization)
-- **asyncio + httpx** for async HTTP
-- **websockets** for real-time streaming
-- Type annotations everywhere for agent introspection
-- `__repr__` and `__str__` on all types for LLM-friendly output
-
-### Rust
-
-Rust is the primary language for high-frequency trading, co-located strategies, and infrastructure. The v2 Rust SDK uses:
-
-- **serde** with derive macros for zero-cost serialization
-- **tokio** async runtime
-- **reqwest** for HTTP with connection pooling
-- **tokio-tungstenite** for WebSocket
-- Full `Send + Sync` guarantees for concurrent agents
-- `thiserror` for structured error hierarchies
+| **Order lifecycle tracking** | Bots must know exactly what happened to every order — placed, filled, partially filled, rejected, cancelled | Every write returns structured results with tx hash and order ID; WebSocket streams order updates; client_order_id for correlation |
+| **Position state awareness** | Bots must always know their current exposure, margin usage, and liquidation distance | Local position state manager synced via WebSocket; computed fields for margin ratio, liq distance |
+| **Bulk order management** | Market makers need to atomically replace all quotes in a single tx | First-class bulk order API with sequence number management and fill tracking |
+| **Funding rate impact** | Continuous funding accrues every second and affects equity/liquidation | SDK computes funding impact on unrealized PnL; models expose accrued funding fields |
+| **Fee awareness** | Maker/taker fees affect strategy profitability | Fee schedule exposed; order results include fee amounts; builder fee support |
+| **Transaction latency** | Every millisecond between signal and execution is money | Synchronous tx build, pre-cached ABI/gas/chain-id, parallel submission via orderless nonces |
+| **Reconnection without state loss** | Network drops cannot cause missed fills or orphaned orders | WS auto-reconnect with subscription restore; position state re-sync on reconnect |
+| **Idempotent order placement** | Retry logic must not double-place orders | client_order_id as natural idempotency key; cancel-by-client-id |
+| **Gas management** | On-chain execution means gas costs matter at scale | Background gas price manager, gas station for sponsored tx, gas estimation with multiplier |
+| **Multi-subaccount isolation** | Run multiple strategies with isolated margin/risk | First-class subaccount management; per-subaccount state tracking |
 
 ## Document Index
 
 | Document | Description |
 |---|---|
-| [01-design-principles.md](./01-design-principles.md) | Agent-first design principles and patterns |
-| [02-structured-data-models.md](./02-structured-data-models.md) | All data types, enums, and schemas |
-| [03-python-sdk.md](./03-python-sdk.md) | Python SDK specification and idioms |
-| [04-rust-sdk.md](./04-rust-sdk.md) | Rust SDK specification and idioms |
-| [05-rest-api.md](./05-rest-api.md) | REST API client specification |
-| [06-websocket-api.md](./06-websocket-api.md) | WebSocket streaming specification |
-| [07-transaction-builder.md](./07-transaction-builder.md) | On-chain transaction builder specification |
-| [08-error-handling.md](./08-error-handling.md) | Error taxonomy, recovery, and observability |
-| [09-performance.md](./09-performance.md) | Performance requirements and benchmarks |
-| [10-agent-patterns.md](./10-agent-patterns.md) | Agent integration patterns and examples |
+| [01-design-principles.md](./01-design-principles.md) | What bots and agents actually need, and the design decisions that follow |
+| [02-structured-data-models.md](./02-structured-data-models.md) | All data types, enums, computed fields, and derived state |
+| [03-python-sdk.md](./03-python-sdk.md) | Python SDK specification — strategy prototyping and AI agents |
+| [04-rust-sdk.md](./04-rust-sdk.md) | Rust SDK specification — high-performance production trading |
+| [05-rest-api.md](./05-rest-api.md) | REST API client with rate limit strategy and caching |
+| [06-websocket-api.md](./06-websocket-api.md) | WebSocket streaming, orderbook management, state synchronization |
+| [07-transaction-builder.md](./07-transaction-builder.md) | On-chain transaction builder — latency optimization deep dive |
+| [08-error-handling.md](./08-error-handling.md) | Trading-specific error recovery and position safety |
+| [09-performance.md](./09-performance.md) | Performance requirements, real trading benchmarks |
+| [10-agent-patterns.md](./10-agent-patterns.md) | Real agentic trading workflows and architecture patterns |
+| [11-go-sdk.md](./11-go-sdk.md) | Go SDK specification — future high-concurrency server infrastructure |
 
 ## Platform Summary
 
 Decibel is a fully on-chain perpetual futures exchange on Aptos:
 
-- **Order book**: Central Limit Order Book (CLOB) matching engine
-- **Margin**: Cross and isolated margin modes
-- **Collateral**: Multi-collateral, primarily USDC
-- **Accounts**: Subaccount system for position isolation
-- **Vaults**: Pooled capital management with performance fees
-- **Orders**: Limit, IOC, post-only, TWAP, bulk, TP/SL
-- **Delegation**: Automated trading via delegated accounts
-- **Builder fees**: Revenue share for frontend/bot integrators
+- **Order book**: Central Limit Order Book (CLOB) with price-time priority, deterministic matching
+- **Matching**: Executed via Aptos Block-STM — matching and settlement in one atomic transaction
+- **Margin**: Cross-margin (shared collateral) and isolated margin modes
+- **Mark price**: `median(P_oracle, P_mid, P_basis)` where `P_basis = P_oracle × EMA_150s(P_mid / P_oracle)`
+- **Funding**: Continuous — accrues every oracle update (~1 second), not periodic
+- **Collateral**: USDC (6 decimals); multi-collateral support
+- **Liquidation**: Two-stage (market disposition → backstop vault), fully on-chain
+- **Fees**: Tiered maker/taker (0 maker at $1B+ volume); builder fee system for integrators
+- **Accounts**: Owner → API Wallet → Subaccount (Trading Account) hierarchy; delegation system
+- **Vaults**: On-chain pooled capital with fungible share tokens and interval performance fees
+- **Orders**: Limit (GTC/PostOnly/IOC), TWAP, bulk orders (atomic replace), stop orders, TP/SL
 
 ### API Surface
 
 | Layer | Transport | Purpose |
 |---|---|---|
 | REST API | HTTPS GET | Read market data, account state, history |
-| WebSocket | WSS | Real-time streaming of prices, positions, orders |
-| On-Chain | Aptos transactions | Write operations — place orders, manage accounts |
+| WebSocket | WSS | Real-time streaming of prices, depth, positions, orders, fills |
+| On-Chain | Aptos transactions | Write operations — place/cancel orders, deposits, delegations, vaults |
 
 ### Network Endpoints
 
@@ -95,10 +95,30 @@ Decibel is a fully on-chain perpetual futures exchange on Aptos:
 
 ### Authentication
 
-- **REST/WebSocket**: Bearer token via `Authorization: Bearer <KEY>` header (REST) or `Sec-Websocket-Protocol: decibel, <KEY>` (WebSocket)
-- **On-Chain**: Ed25519 private key for transaction signing
-- **Node API**: Aptos fullnode API key for higher rate limits
+| Method | When Used | How |
+|---|---|---|
+| Bearer token | REST and WebSocket | `Authorization: Bearer <KEY>` (REST), `Sec-Websocket-Protocol: decibel, <KEY>` (WS) |
+| Node API key | Aptos fullnode calls | Higher rate limits for tx submission and view calls |
+| Ed25519 private key | On-chain transactions | Signs raw transaction bytes |
 
-## Versioning
+### Contract Addresses
 
-The v2 SDK targets compatibility version `v0.4` of the Decibel protocol. The SDK version follows semver independently from the protocol version.
+| Network | Package Address |
+|---|---|
+| Mainnet | `0x50ead22afd6ffd9769e3b3d6e0e64a2a350d68e8b102c4e72e33d0b8cfdfdb06` |
+| Testnet | `0x952535c3049e52f195f26798c2f1340d7dd5100edbe0f464e520a974d16fbe9f` |
+
+## What Changed from V1
+
+| Area | V1 | V2 |
+|---|---|---|
+| **Target audience** | Human developers building UIs | Trading bots and AI agents |
+| **Languages** | Rust, Swift, Kotlin, Go | Python, Rust, Go (future) |
+| **Client model** | Separate ReadClient + WriteClient | Unified client with state management |
+| **Position tracking** | Fetch-only | Local state synced via WebSocket with computed risk fields |
+| **Bulk orders** | Basic support | First-class with sequence management, fill tracking |
+| **Error handling** | Type hierarchy | Structured errors with retry hints and position safety flags |
+| **Funding** | Raw fields | Computed impact on PnL and liquidation distance |
+| **Fee model** | Not specified | Fee schedule, builder fees, fee estimation |
+| **Orderbook** | Snapshot only | Managed local orderbook with incremental updates |
+| **Testing** | Unit + integration | Unit + integration + property + agent scenario + backtest |
