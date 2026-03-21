@@ -1,18 +1,19 @@
 # Scratchpad
 
-## Task: Error Types and Utility Modules for Rust v2 SDK
+## Current Task
+Create Rust v2 SDK models, config, and TDD tests at `/workspace/sdk-rust-v2/`.
 
-### Status: COMPLETE
+## Status: COMPLETE
+- All files created and compiling
+- 169 unit tests + 12 integration tests passing (181 total)
 
-All files created with full implementations and passing tests:
-- `sdk-rust-v2/src/error.rs` — 14 error variants with position safety classification, retryability, criticality checks (25 tests)
-- `sdk-rust-v2/src/utils/mod.rs` — Re-exports address, formatting, nonce submodules
-- `sdk-rust-v2/src/utils/address.rs` — Market/subaccount/vault address derivation via SHA3-256 (12 tests)
-- `sdk-rust-v2/src/utils/formatting.rs` — Chain unit conversion, tick/lot rounding (17 tests)
-- `sdk-rust-v2/src/utils/nonce.rs` — Random u64 replay protection nonce (4 tests)
-- `sdk-rust-v2/src/lib.rs` — Updated to export error and utils modules
-
-### Notes
-- Trimmed Cargo.toml to only include dependencies needed by current modules (serde, thiserror, sha3, hex, rand)
-- Removed stub modules (config, models, state, bulk) that referenced unavailable deps
-- 65 tests all passing
+## Files Created/Modified
+1. `sdk-rust-v2/Cargo.toml` — added `serde_repr` dependency
+2. `sdk-rust-v2/src/lib.rs` — re-exports config, error, models, utils
+3. `sdk-rust-v2/src/config.rs` — Network enum (Mainnet/Testnet/Devnet/Custom), Deployment, DecibelConfig, presets
+4. `sdk-rust-v2/src/models/mod.rs` — re-exports enums, common, market, account
+5. `sdk-rust-v2/src/models/enums.rs` — TimeInForce, CandlestickInterval, VolumeWindow, OrderStatusType, SortDirection, TwapStatus, TradeAction, VaultType, DepthAggregationLevel
+6. `sdk-rust-v2/src/models/common.rs` — PageParams, SortParams, PaginatedResponse<T>, PlaceOrderResult, TransactionResult
+7. `sdk-rust-v2/src/models/market.rs` — PerpMarketConfig, MarketOrder, MarketDepth, MarketPrice, MarketContext, Candlestick, MarketTrade
+8. `sdk-rust-v2/src/models/account.rs` — AccountOverview, UserPosition, UserOpenOrder, UserTradeHistoryItem, UserSubaccount, UserFundingHistoryItem, UserFundHistoryItem, Delegation
+9. `sdk-rust-v2/tests/integration_models.rs` — cross-crate integration tests
