@@ -1,69 +1,12 @@
-# SCRATCHPAD
+# Scratchpad
 
-## Status: In Progress — TDD Test Suite Creation
+## Task: Create TDD test files for Decibel Python SDK
 
-## TDD/BDD Test Files Created
+### Status: COMPLETE
 
-Created 7 test files under `decibel-sdk-python/tests/`:
-
-1. **conftest.py** — Shared fixtures for all model types (MarketPrice, UserPosition, AccountOverview, PerpMarketConfig, MarketDepth, etc.), mock PositionStateManager/BulkOrderManager, DecibelConfig presets, factory helpers, pytest markers
-2. **unit/models/test_market.py** — PerpMarketConfig (roundtrip, schema, computed: min_size_decimal, lot_size_decimal, tick_size_decimal, mm_fraction, frozen), MarketPrice (roundtrip, funding_rate_hourly, funding_direction, str), MarketContext, MarketDepth (best_bid/ask, spread, mid_price, bid_depth_at, ask_depth_at, imbalance, empty book), PriceLevel, MarketTrade, Candlestick (wire aliases, body_pct, range_pct, is_bullish)
-3. **unit/models/test_account.py** — AccountOverview (margin_usage_pct, liquidation_buffer_usd/pct, is_liquidation_warning, total_withdrawable, zero equity edge cases), UserPosition (is_long/short/flat, direction, notional, unrealized_pnl, unrealized_pnl_pct, total_unrealized_pnl, liquidation_distance_pct, has_tp/sl/protection), UserSubaccount
-4. **unit/models/test_order.py** — UserOpenOrder (filled_size, fill_pct, side, notional, age_ms), OrderStatus, PlaceOrderResult (success/failure), TransactionResult (success/failure)
-5. **unit/models/test_enums.py** — TimeInForce (0,1,2), OrderStatusType (all variants + parse + is_success/failure/final), TradeAction, CandlestickInterval (13 wire values), VolumeWindow (4 wire values), SortDirection (ASC/DESC), TwapStatus
-6. **unit/models/test_trade.py** — UserTradeHistoryItem (net_pnl, notional, rebate handling), UserFundingHistoryItem, UserFundHistoryItem
-7. **unit/models/test_pagination.py** — PageParams (defaults, validation), SortParams, PaginatedResponse[T] (int, str, model items, empty, roundtrip)
-
-## BDD Feature Files Created
-
-Created 7 Gherkin feature files under `decibel-sdk-python/tests/bdd/features/`:
-
-1. **position_state.feature** — 9 scenarios: initial WS snapshot, live updates, sync reads, flat/closed positions, multi-subaccount, net exposure, gross exposure, mark price subscription, depth subscription
-2. **order_lifecycle.feature** — 7 scenarios: placement with order_id, WS open_orders, partial fill, full fill, cancel, client_order_id in WS/REST, client_order_id after restart
-3. **bulk_orders.feature** — 8 scenarios: initial two-sided quotes, atomic replacement, sequence auto-increment, fill tracking, fill summary, cancel_all, max 30 levels, one-sided quoting
-4. **risk_monitoring.feature** — 8 scenarios: liquidation distance (long/short), margin warning 80%, margin critical 90%, funding accrual, unprotected positions, risk summary, auto-pause, auto TP/SL
-5. **reconnection.feature** — 7 scenarios: auto-reconnect with backoff, subscription restoration, REST re-sync, gap_detected flag, trading pause, full recovery flow, multiple disconnections with backoff cap
-6. **error_safety.feature** — 7 scenarios: ValidationError SAFE, RateLimitError SAFE, SubmissionError UNKNOWN, VmError UNKNOWN cancel, CriticalTradingError SL, CriticalTradingError cancel-all, WebSocketError STALE
-7. **price_formatting.feature** — 6 scenarios: human→chain price, human→chain size with lot_size rounding, min_size clamping, tick_size rounding (buy down/sell up), raw mode bypass, round-trip fidelity
-
-All scenarios use concrete numbers from the actual SDK models (BTC-USD ~$60k, ETH-USD ~$3k, realistic margin/funding/lot/tick values).
-
-## V2 Specification — Second Pass (Trading Bot & Agent Deep Dive)
-
-### What Changed
-
-Rewrote all 11 docs + added Go SDK spec (12 total, 11,700+ lines). Major changes:
-
-1. **Design principles**: Replaced generic SW principles with concrete trading problems
-   - Position state management with computed risk fields
-   - Bulk order management as core market making primitive
-   - Continuous funding impact awareness
-   - Margin/leverage/liquidation as hard constraints
-   - Fee schedule awareness for strategy profitability
-   - Transaction latency budgets with realistic numbers
-   - Reconnection without state loss protocol
-   - Errors with position safety classification
-
-2. **Data models**: Added computed methods on all major models
-   - MarketDepth: spread, imbalance, depth_at
-   - UserPosition: unrealized_pnl, liquidation_distance_pct, has_protection
-   - AccountOverview: margin_usage_pct, liquidation_buffer, is_liquidation_warning
-   - Added BulkOrderSet and BulkOrderFill models
-
-3. **Python SDK**: Rewrote around PositionStateManager, BulkOrderManager, order lifecycle tracking, risk monitoring, reconnection strategy, real bot patterns
-
-4. **Rust SDK**: Rewrote with zero-allocation hot paths, lock-free patterns, PositionSafety enum on errors, cache-line-aligned position state, real market making example, criterion benchmarks
-
-5. **Go SDK**: New spec for future infrastructure use (API gateways, orchestrators, monitoring)
-
-6. **REST API**: Added rate limit strategy, request prioritization by bot type, state reconciliation protocol
-
-7. **WebSocket**: Added orderbook management (full snapshot model), state synchronization, topic priority by bot type, latency measurement, multi-subaccount subscription management
-
-8. **Transaction builder**: Added clock drift handling, bulk order specifics (sequence numbers, partial failures), gas station vs self-paid comparison, parallel submission patterns, ABI versioning
-
-9. **Error handling**: Rewrote around position safety classification (SAFE/UNKNOWN/STALE/CRITICAL), critical error classes, emergency procedures, trading-specific recovery scenarios
-
-10. **Performance**: Rewrote with end-to-end latency budget, hot path identification, Rust memory layout, gas cost analysis, real-world benchmark specifications
-
-11. **Agent patterns**: 5 production-ready patterns: market making (with quote engine, inventory skew, PnL tracker), funding rate arbitrage, multi-leg strategy, LLM-powered agent, risk watchdog; plus anti-patterns section
+### Files Written/Updated:
+1. `decibel-sdk-python/tests/unit/state/test_position_manager.py` — Updated with multi-subaccount and is_connected tests
+2. `decibel-sdk-python/tests/unit/state/test_risk_monitor.py` — Created from scratch
+3. `decibel-sdk-python/tests/unit/bulk/test_bulk_order_manager.py` — Created from scratch
+4. `decibel-sdk-python/tests/unit/state/test_order_tracker.py` — Updated with status lookup, cancel transition, and duplicate-status tests
+5. `decibel-sdk-python/tests/unit/test_errors.py` — Updated with comprehensive is_retryable and retry_after_ms property tests
