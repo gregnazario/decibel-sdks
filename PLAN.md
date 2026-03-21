@@ -34,10 +34,12 @@
   - [ ] Transaction builder (pure functions)
   - [ ] Error types with PositionSafety enum
 - [ ] Testing
-  - [ ] Unit tests for models, formatting, address derivation
-  - [ ] Integration tests against testnet
-  - [ ] Benchmarks (serialization, tx build, sign)
-  - [ ] Agent scenario tests
+    - [x] TDD test files for all models (market, account, order, enums, trade, pagination)
+    - [x] conftest.py with fixtures, factories, mock state managers
+    - [ ] Unit tests for formatting, address derivation
+    - [ ] Integration tests against testnet
+    - [ ] Benchmarks (serialization, tx build, sign)
+    - [ ] Agent scenario tests
 
 ### Phase 3: Go SDK (Future)
 - [ ] Implement Go SDK based on spec

@@ -1,6 +1,18 @@
 # SCRATCHPAD
 
-## Status: Complete
+## Status: In Progress — TDD Test Suite Creation
+
+## TDD/BDD Test Files Created
+
+Created 7 test files under `decibel-sdk-python/tests/`:
+
+1. **conftest.py** — Shared fixtures for all model types (MarketPrice, UserPosition, AccountOverview, PerpMarketConfig, MarketDepth, etc.), mock PositionStateManager/BulkOrderManager, DecibelConfig presets, factory helpers, pytest markers
+2. **unit/models/test_market.py** — PerpMarketConfig (roundtrip, schema, computed: min_size_decimal, lot_size_decimal, tick_size_decimal, mm_fraction, frozen), MarketPrice (roundtrip, funding_rate_hourly, funding_direction, str), MarketContext, MarketDepth (best_bid/ask, spread, mid_price, bid_depth_at, ask_depth_at, imbalance, empty book), PriceLevel, MarketTrade, Candlestick (wire aliases, body_pct, range_pct, is_bullish)
+3. **unit/models/test_account.py** — AccountOverview (margin_usage_pct, liquidation_buffer_usd/pct, is_liquidation_warning, total_withdrawable, zero equity edge cases), UserPosition (is_long/short/flat, direction, notional, unrealized_pnl, unrealized_pnl_pct, total_unrealized_pnl, liquidation_distance_pct, has_tp/sl/protection), UserSubaccount
+4. **unit/models/test_order.py** — UserOpenOrder (filled_size, fill_pct, side, notional, age_ms), OrderStatus, PlaceOrderResult (success/failure), TransactionResult (success/failure)
+5. **unit/models/test_enums.py** — TimeInForce (0,1,2), OrderStatusType (all variants + parse + is_success/failure/final), TradeAction, CandlestickInterval (13 wire values), VolumeWindow (4 wire values), SortDirection (ASC/DESC), TwapStatus
+6. **unit/models/test_trade.py** — UserTradeHistoryItem (net_pnl, notional, rebate handling), UserFundingHistoryItem, UserFundHistoryItem
+7. **unit/models/test_pagination.py** — PageParams (defaults, validation), SortParams, PaginatedResponse[T] (int, str, model items, empty, roundtrip)
 
 ## V2 Specification — Second Pass (Trading Bot & Agent Deep Dive)
 

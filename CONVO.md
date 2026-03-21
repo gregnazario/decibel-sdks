@@ -34,3 +34,16 @@ Created 11 specification documents under `docs/v2/` for agent-first SDK design t
 - Python: AI/ML agents, strategy prototyping, medium-frequency trading
 - Rust: HFT, market making, co-located infrastructure
 - Go (future): API gateways, orchestrators, monitoring services
+
+### Task 3: Create TDD/BDD Test Files for Python SDK
+
+**Request**: Write 7 test files defining the API contract for all major model types before implementation.
+
+**Approach**: Read all existing model source files (market.py, account.py, order.py, enums.py, common.py, config.py) to understand current fields and structure. Wrote TDD tests that:
+- Test existing serialization roundtrips (dict and JSON)
+- Define computed properties not yet implemented (funding_rate_hourly, unrealized_pnl, margin_usage_pct, etc.)
+- Use realistic BTC ~$95k / ETH ~$3.5k trading data
+- Cover edge cases (empty orderbook, zero equity, zero-size position)
+- Pin enum wire values to prevent silent API breakage
+
+**Files created**: conftest.py, test_market.py, test_account.py, test_order.py, test_enums.py, test_trade.py, test_pagination.py
