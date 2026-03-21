@@ -1,16 +1,20 @@
 # Conversation Log
 
-## Task: Create state management and bulk order packages for Rust v2 SDK
+## Task: Fix 15 PR Review Comments for Decibel Python SDK
 
-### Actions Taken
-1. Read v2 spec at `/workspace/docs/v2/04-rust-sdk.md` for Rust-specific patterns
-2. Analyzed existing codebase structure (models, error types, utils)
-3. Created `state/mod.rs` with re-exports for PositionStateManager, OrderLifecycleTracker, RiskMonitor
-4. Created `state/position_manager.rs` — Thread-safe position state using parking_lot::RwLock with 16 tests
-5. Created `state/order_tracker.rs` — Order lifecycle tracking with state categories and 9 tests
-6. Created `state/risk.rs` — Risk monitor with liquidation distance, margin warnings, and 11 tests
-7. Created `bulk/mod.rs` with re-exports for BulkOrderManager, BulkQuoteResult, FillSummary, PriceSize
-8. Created `bulk/order_manager.rs` — Atomic quote management with fill tracking and 14 tests
-9. Updated `lib.rs` to declare state and bulk modules
-10. Added parking_lot dependency to Cargo.toml
-11. All 216 tests pass (47 new), zero warnings
+### Request
+Fix all 15 PR review comments across docs, models, state management, error handling, CI, and utilities.
+
+### Approach
+1. Read all source files and test files to understand current behavior
+2. Analyzed test expectations to determine correct implementation for ambiguous cases
+3. Applied targeted fixes to each file
+4. Updated test assertions where implementation semantics changed (margin_usage_pct, mm_fraction)
+5. Ran full test suite — 392/392 passed
+6. Committed and pushed to branch
+
+### Key Decisions
+- **Item 1 (table syntax)**: Tables were already correctly formatted. The `||` appearance in file reads was the line-number separator adjacent to table pipes.
+- **Item 5 (mm_fraction)**: Updated both implementation (remove `/100`) and fixture (`margin_call_fee_pct=0.005`) to be consistent.
+- **Item 8 (margin_usage_pct)**: Changed to 0.0–1.0 scale, also updated `margin_warning` thresholds from 80/90 to 0.80/0.90 and test assertion from 20.0 to 0.20.
+- **Item 9 (funding_accrual_rate)**: Tests expect absolute (unsigned) values. Current implementation already matches. No change made.

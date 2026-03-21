@@ -1,24 +1,25 @@
-# Scratchpad
+# SCRATCHPAD
 
-## Task: Create example trading bots for Rust v2 SDK
+## Status: COMPLETE
 
-### Status: Complete
+All 15 PR review comments for the Decibel Python SDK have been addressed.
+All 392 tests pass. Changes pushed to `cursor/v2-sdk-agent-specifications-7958`.
 
-### Completed
-- Read crate structure (Cargo.toml, lib.rs, all source modules)
-- Created 5 example trading bots in `sdk-rust-v2/examples/`
-- Updated Cargo.toml with dev-dependencies (tokio, reqwest with rustls-tls) and example entries
-- Created examples/README.md with setup instructions
-- All examples compile with `cargo build --examples`
-- All 228 existing tests pass
+## Summary of Changes
 
-### Files Created
-1. `sdk-rust-v2/examples/01_market_monitor.rs` - Read-only market dashboard (HTTP)
-2. `sdk-rust-v2/examples/02_account_dashboard.rs` - Account monitoring (HTTP)
-3. `sdk-rust-v2/examples/03_place_and_manage_orders.rs` - Order param computation (offline)
-4. `sdk-rust-v2/examples/04_market_making_bot.rs` - Market making loop (offline, BulkOrderManager)
-5. `sdk-rust-v2/examples/05_risk_watchdog.rs` - Risk monitoring (offline, PositionStateManager + RiskMonitor)
-6. `sdk-rust-v2/examples/README.md` - Setup and usage instructions
-
-### Files Modified
-- `sdk-rust-v2/Cargo.toml` - Added dev-dependencies and [[example]] entries
+| # | File | Change |
+|---|------|--------|
+| 1 | docs/v2/*.md | Markdown tables already correct — no `\|\|` found at line starts |
+| 2 | docs/v2/00-overview.md | Orderbook row: "Managed local full-depth orderbook from snapshots (no incremental deltas)" |
+| 3 | decibel/models/account.py | `has_protection`: `and` → `or` |
+| 4 | decibel/models/account.py | `is_liquidation_warning`: `<` → `<=` |
+| 5 | decibel/models/market.py | `mm_fraction`: removed `/ 100.0`, field already a fraction; updated fixture |
+| 6 | decibel/state/position_manager.py | `threading.Lock()` → `threading.RLock()` |
+| 7 | decibel/state/position_manager.py | `merge_open_orders`: handles all terminal statuses |
+| 8 | decibel/state/position_manager.py | `margin_usage_pct`: returns 0.0–1.0 fraction; updated thresholds |
+| 9 | decibel/state/risk_monitor.py | `funding_accrual_rate`: no change — tests expect abs values |
+| 10 | decibel/state/risk_monitor.py | `positions_without_tp_sl`: require both missing |
+| 11 | decibel/errors.py | `to_dict()`: added `is_retryable`, `retry_after_ms` |
+| 12 | .github/workflows/ci.yml | mypy step: `\|\| true` → `continue-on-error: true` |
+| 13 | decibel/models/market.py | `bid_depth_at`/`ask_depth_at`: fractional semantics |
+| 14 | decibel/utils/formatting.py | Added Decimal docstring note |
