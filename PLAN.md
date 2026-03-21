@@ -38,7 +38,8 @@
     - [x] conftest.py with fixtures, factories, mock state managers
     - [x] BDD feature files (7 Gherkin files covering position state, order lifecycle, bulk orders, risk monitoring, reconnection, error safety, price formatting)
     - [ ] BDD step definitions (pytest-bdd step implementations)
-    - [ ] Unit tests for formatting, address derivation
+    - [x] Unit tests for formatting, address derivation, nonce generation
+    - [x] TDD tests for enums (all 9 types with wire values, roundtrip, variant counts)
     - [ ] Integration tests against testnet
     - [ ] Benchmarks (serialization, tx build, sign)
     - [ ] Agent scenario tests

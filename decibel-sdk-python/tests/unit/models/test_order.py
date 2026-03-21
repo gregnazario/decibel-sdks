@@ -1,9 +1,10 @@
 """TDD tests for order data models.
 
 These tests define the API contract for UserOpenOrder, OrderStatus,
-PlaceOrderResult, and TransactionResult.  All computed properties
-(filled_size, fill_pct, side, notional, age_ms) are specified before
-implementation so the model behaviour is locked down by tests.
+PlaceOrderResult, UserTradeHistoryItem, and TransactionResult.  All
+computed properties (filled_size, fill_pct, side, notional, age_ms,
+net_pnl) are specified before implementation so the model behaviour
+is locked down by tests.
 """
 
 from __future__ import annotations
@@ -12,8 +13,9 @@ import time
 
 import pytest
 
-from decibel.models.account import UserOpenOrder
+from decibel.models.account import UserOpenOrder, UserTradeHistoryItem
 from decibel.models.common import PlaceOrderResult
+from decibel.models.enums import TradeAction
 from decibel.models.order import OrderStatus
 
 from tests.conftest import NOW_MS
@@ -189,6 +191,109 @@ class TestPlaceOrderResult:
         json_str = place_order_success.model_dump_json()
         restored = PlaceOrderResult.model_validate_json(json_str)
         assert restored == place_order_success
+
+
+# ===================================================================
+# UserTradeHistoryItem
+# ===================================================================
+
+
+class TestUserTradeHistoryItem:
+    """Contract tests for the trade history item model.
+
+    Trade history drives PnL reporting and strategy back-testing;
+    computed helpers must match exchange semantics exactly.
+    """
+
+    def test_trade_history_item_roundtrip(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
+        """Serialise → deserialise must preserve every field.
+
+        Trade logs are persisted to databases; a lossy roundtrip would
+        corrupt historical PnL records.
+        """
+        data = btc_trade_history_item.model_dump()
+        restored = UserTradeHistoryItem(**data)
+        assert restored == btc_trade_history_item
+
+    def test_trade_history_item_json_roundtrip(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
+        """JSON wire-format roundtrip."""
+        json_str = btc_trade_history_item.model_dump_json()
+        restored = UserTradeHistoryItem.model_validate_json(json_str)
+        assert restored == btc_trade_history_item
+
+    def test_trade_history_item_notional(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
+        """notional = size * price.
+
+        0.5 BTC × $95,000 = $47,500. Used for volume and exposure tracking.
+        """
+        assert btc_trade_history_item.notional == pytest.approx(47_500.0)
+
+    def test_trade_history_item_net_pnl_profit(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
+        """net_pnl = realized_pnl - fee for a profitable trade.
+
+        $500 realized PnL - $7.50 fee = $492.50 net.
+        Trading bots use net_pnl (not gross) for true strategy evaluation.
+        """
+        assert btc_trade_history_item.net_pnl == pytest.approx(492.50)
+
+    def test_trade_history_item_net_pnl_with_rebate(self) -> None:
+        """net_pnl adds the fee back when is_rebate is True.
+
+        Maker rebates reduce effective costs: $500 + $2.00 rebate = $502.00.
+        """
+        item = UserTradeHistoryItem(
+            account="0xsub1",
+            market="0xabc123",
+            action=TradeAction.CLOSE_LONG,
+            size=0.5,
+            price=95_000.0,
+            is_profit=True,
+            realized_pnl_amount=500.0,
+            is_funding_positive=True,
+            realized_funding_amount=5.0,
+            is_rebate=True,
+            fee_amount=2.0,
+            transaction_unix_ms=NOW_MS,
+            transaction_version=100_004,
+        )
+        assert item.net_pnl == pytest.approx(502.0)
+
+    def test_trade_history_item_net_pnl_loss(self) -> None:
+        """net_pnl for a losing trade: negative PnL minus fee.
+
+        -$300 PnL - $5.00 fee = -$305.00.
+        """
+        item = UserTradeHistoryItem(
+            account="0xsub1",
+            market="0xdef456",
+            action=TradeAction.CLOSE_SHORT,
+            size=2.0,
+            price=3_600.0,
+            is_profit=False,
+            realized_pnl_amount=-300.0,
+            is_funding_positive=False,
+            realized_funding_amount=1.0,
+            is_rebate=False,
+            fee_amount=5.0,
+            transaction_unix_ms=NOW_MS,
+            transaction_version=100_005,
+        )
+        assert item.net_pnl == pytest.approx(-305.0)
+
+    def test_trade_history_item_action_enum(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
+        """action field is a TradeAction enum, not a raw string.
+
+        Type safety prevents typos in strategy branching logic.
+        """
+        assert btc_trade_history_item.action == TradeAction.CLOSE_LONG
+        assert isinstance(btc_trade_history_item.action, TradeAction)
+
+    def test_trade_history_item_fields(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
+        """Verify core field values after construction."""
+        assert btc_trade_history_item.size == pytest.approx(0.5)
+        assert btc_trade_history_item.price == pytest.approx(95_000.0)
+        assert btc_trade_history_item.is_profit is True
+        assert btc_trade_history_item.fee_amount == pytest.approx(7.5)
 
 
 # ===================================================================
