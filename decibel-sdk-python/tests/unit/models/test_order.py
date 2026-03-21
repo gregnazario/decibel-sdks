@@ -9,17 +9,13 @@ is locked down by tests.
 
 from __future__ import annotations
 
-import time
-
 import pytest
 
 from decibel.models.account import UserOpenOrder, UserTradeHistoryItem
 from decibel.models.common import PlaceOrderResult
 from decibel.models.enums import TradeAction
 from decibel.models.order import OrderStatus
-
 from tests.conftest import NOW_MS
-
 
 # ===================================================================
 # UserOpenOrder

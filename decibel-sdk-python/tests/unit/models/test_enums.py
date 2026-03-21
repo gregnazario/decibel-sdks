@@ -8,8 +8,6 @@ variant is asserted individually.
 
 from __future__ import annotations
 
-import pytest
-
 from decibel.models.enums import (
     CandlestickInterval,
     MarketDepthAggregationSize,
@@ -21,7 +19,6 @@ from decibel.models.enums import (
     VaultType,
     VolumeWindow,
 )
-
 
 # ===================================================================
 # TimeInForce (IntEnum)

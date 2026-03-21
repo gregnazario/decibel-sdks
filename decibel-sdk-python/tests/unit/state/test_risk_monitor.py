@@ -17,7 +17,7 @@ from __future__ import annotations
 import pytest
 
 from decibel.models.account import AccountOverview, UserOpenOrder, UserPosition
-from decibel.models.market import MarketDepth, MarketOrder, MarketPrice
+from decibel.models.market import MarketPrice
 from decibel.state.position_manager import PositionStateManager
 from decibel.state.risk_monitor import RiskMonitor
 
@@ -297,7 +297,7 @@ class TestFundingAccrual:
         total = monitor.total_funding_accrual_rate(SUBACCOUNT)
         assert total is not None
         btc_rate = 2.0 * 60_000.0 * 0.5 / 10_000
-        eth_rate = -(-10.0) * 3_000.0 * 1.0 / 10_000
+        eth_rate = abs(-10.0) * 3_000.0 * 1.0 / 10_000
         assert total == pytest.approx(btc_rate + eth_rate, rel=1e-3)
 
 

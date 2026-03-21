@@ -1,7 +1,6 @@
 """Gas price manager for fetching gas prices from gas station."""
 
 import asyncio
-from typing import Any
 
 import httpx
 

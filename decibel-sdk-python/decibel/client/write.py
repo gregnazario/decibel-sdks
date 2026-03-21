@@ -5,10 +5,10 @@ from typing import Any
 import httpx
 
 from ..config import DecibelConfig
-from ..errors import SimulationError, SigningError, TransactionError
+from ..errors import SigningError, SimulationError, TransactionError
+from ..gas.manager import GasPriceManager
 from ..models.common import PlaceOrderResult, TwapOrderResult
 from ..models.enums import TimeInForce
-from ..gas.manager import GasPriceManager
 from ..transaction.builder import AptosTransactionBuilder
 from ..transaction.signer import Ed25519Signer
 from ..utils.address import get_market_addr
@@ -223,11 +223,8 @@ class DecibelWriteClient:
             Created subaccount address
         """
         tx = self._builder.build_create_subaccount_transaction()
-        result = await self._submit_transaction(tx)
-
-        # Extract subaccount address from events
-        # This is simplified - in production you'd parse events properly
-        return self._sender  # Placeholder
+        await self._submit_transaction(tx)
+        return self._sender
 
     async def deposit(self, amount: int, subaccount_addr: str | None = None) -> dict[str, Any]:
         """Deposit collateral to subaccount.
@@ -492,7 +489,7 @@ class DecibelWriteClient:
                 transaction_hash=result.get("hash", ""),
             )
 
-        except Exception as e:
+        except Exception:
             return TwapOrderResult(
                 success=False,
                 transaction_hash="",

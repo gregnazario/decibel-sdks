@@ -316,17 +316,14 @@ jobs:
           echo ""
           echo "Coverage reports uploaded to Codecov (if CODECOV_TOKEN is set)"
           echo "View at: https://codecov.io/gh/${{ github.repository }}"
-
-          FAILED=0
-          for job in python-v2 rust-v2 rust go swift kotlin; do
-            result="${{ needs[job].result }}"
-            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
-              FAILED=1
-            fi
-          done
-
-          if [ "$FAILED" -eq 1 ]; then
-            echo "One or more SDK tests failed!"
-            exit 1
-          fi
-          echo "All SDK tests passed!"
+      - name: Fail if any job failed
+        if: |
+          needs.python-v2.result == 'failure' ||
+          needs.rust-v2.result == 'failure' ||
+          needs.rust.result == 'failure' ||
+          needs.go.result == 'failure' ||
+          needs.swift.result == 'failure' ||
+          needs.kotlin.result == 'failure'
+        run: |
+          echo "One or more SDK tests failed!"
+          exit 1

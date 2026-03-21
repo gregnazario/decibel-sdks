@@ -1,6 +1,5 @@
 """Tests for utility functions."""
 
-import pytest
 
 from decibel.utils.address import (
     _bcs_serialize_string,

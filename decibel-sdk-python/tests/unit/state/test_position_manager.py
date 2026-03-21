@@ -9,7 +9,6 @@ to fail until the implementation in ``decibel.state.position_manager`` exists.
 from __future__ import annotations
 
 import threading
-import time
 
 import pytest
 

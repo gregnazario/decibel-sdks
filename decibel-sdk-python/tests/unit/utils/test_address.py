@@ -8,13 +8,10 @@ addresses — which would point bots at non-existent on-chain objects.
 
 from __future__ import annotations
 
-import pytest
-
 from decibel.utils.address import (
     get_market_addr,
     get_primary_subaccount_addr,
 )
-
 
 # ===================================================================
 # get_market_addr

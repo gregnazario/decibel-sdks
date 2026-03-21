@@ -1,6 +1,5 @@
 """Aptos transaction builder for Decibel smart contract calls."""
 
-import json
 from typing import Any
 
 from ..config import DecibelConfig

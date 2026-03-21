@@ -12,10 +12,7 @@ ImportError — which is the intended TDD starting state.
 
 from __future__ import annotations
 
-import pytest
-
 from decibel.utils.nonce import generate_replay_protection_nonce
-
 
 # ===================================================================
 # generate_replay_protection_nonce

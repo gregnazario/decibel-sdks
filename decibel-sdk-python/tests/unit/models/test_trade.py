@@ -15,7 +15,6 @@ from decibel.models.account import (
     UserTradeHistoryItem,
 )
 from decibel.models.enums import TradeAction
-
 from tests.conftest import NOW_MS
 
 BTC_MARKET_ADDR = "0xabc123"

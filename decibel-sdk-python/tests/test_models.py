@@ -1,7 +1,5 @@
 """Tests for data models."""
 
-import pytest
-from pydantic import ValidationError
 
 from decibel.models.account import AccountOverview, UserPosition
 from decibel.models.common import PageParams, PaginatedResponse, PlaceOrderResult
@@ -9,13 +7,9 @@ from decibel.models.enums import (
     CandlestickInterval,
     MarketDepthAggregationSize,
     OrderStatusType,
-    SortDirection,
     TimeInForce,
-    TwapStatus,
-    VaultType,
-    VolumeWindow,
 )
-from decibel.models.market import MarketDepth, MarketOrder, MarketPrice, PerpMarketConfig
+from decibel.models.market import MarketDepth, MarketPrice, PerpMarketConfig
 
 
 def test_perp_market_config_model():

@@ -30,7 +30,6 @@ from decibel.errors import (
     WebSocketError,
 )
 
-
 # ---------------------------------------------------------------------------
 # Error hierarchy: each error type carries the correct position_safety level
 # ---------------------------------------------------------------------------

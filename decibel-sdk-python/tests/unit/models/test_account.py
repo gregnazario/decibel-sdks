@@ -9,14 +9,12 @@ follows.  Realistic BTC ~$95k / ETH ~$3.5k data is used throughout.
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
 
 from decibel.models.account import (
     AccountOverview,
     UserPosition,
     UserSubaccount,
 )
-
 
 # ===================================================================
 # AccountOverview

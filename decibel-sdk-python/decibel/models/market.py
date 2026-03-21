@@ -204,7 +204,7 @@ class Candlestick(BaseModel):
     c: float  # Close price
     h: float  # High price
     i: str  # Interval
-    l: float  # Low price
+    l: float  # Low price  # noqa: E741
     o: float  # Open price
     t: int  # Open timestamp
     v: float  # Volume

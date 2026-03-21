@@ -13,9 +13,7 @@ from pydantic import ValidationError
 from decibel.models.common import PageParams, PaginatedResponse, SortParams
 from decibel.models.enums import SortDirection
 from decibel.models.market import MarketPrice
-
 from tests.conftest import NOW_MS
-
 
 # ===================================================================
 # PageParams

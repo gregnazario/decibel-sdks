@@ -1,6 +1,6 @@
 """Account-related data models."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from .enums import TradeAction
 
@@ -140,8 +140,10 @@ class UserPosition(BaseModel):
 
     @property
     def direction(self) -> str:
-        if self.size > 0: return "long"
-        if self.size < 0: return "short"
+        if self.size > 0:
+            return "long"
+        if self.size < 0:
+            return "short"
         return "flat"
 
     @property
