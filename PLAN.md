@@ -1,30 +1,52 @@
 # Plan
 
-## V2 SDK Specification — Agent-First Design
+## V2 SDK Specification — Trading Bot & Agent First
 
 ### Phase 1: Specification (COMPLETE)
-- [x] Analyze docs.decibel.trade API surface
-- [x] Document agent-first design principles
-- [x] Define all data models with schemas
-- [x] Specify Python SDK (Pydantic v2, async, idiomatic)
-- [x] Specify Rust SDK (serde, tokio, idiomatic)
-- [x] Specify REST API client with full endpoint catalog
-- [x] Specify WebSocket streaming with topics and lifecycle
-- [x] Specify transaction builder (sync build, signing, submission)
-- [x] Define error taxonomy with recovery patterns
-- [x] Set performance targets and benchmarks
-- [x] Document agent integration patterns
+- [x] Analyze docs.decibel.trade API surface (REST, WS, on-chain, fees, funding, margin, liquidation)
+- [x] Document trading-bot-specific design principles (position state, bulk orders, funding, margins, fees)
+- [x] Define all data models with computed fields for risk management
+- [x] Specify Python SDK (PositionStateManager, BulkOrderManager, risk monitoring)
+- [x] Specify Rust SDK (zero-allocation hot paths, lock-free patterns, PositionSafety)
+- [x] Specify Go SDK (future — channels, goroutines, infrastructure use cases)
+- [x] Specify REST API client with rate limit strategy and bot-type-specific priorities
+- [x] Specify WebSocket with orderbook management, state sync, multi-subaccount
+- [x] Specify transaction builder with latency optimization and bulk order specifics
+- [x] Define error handling with position safety classification
+- [x] Set performance targets with end-to-end latency budgets and gas cost analysis
+- [x] Document 5 production-ready agent patterns + anti-patterns
 
 ### Phase 2: Implementation (NEXT)
-- [ ] Implement Python SDK based on v2 specification
-- [ ] Implement Rust SDK based on v2 specification
-- [ ] Write unit tests for all data models
-- [ ] Write integration tests against testnet
-- [ ] Write benchmarks for serialization, formatting, and tx building
-- [ ] Set up CI for both SDKs
+- [ ] Implement Python SDK
+  - [ ] Core models (Pydantic v2)
+  - [ ] REST client with caching
+  - [ ] WebSocket client with reconnection
+  - [ ] PositionStateManager
+  - [ ] BulkOrderManager
+  - [ ] Transaction builder
+  - [ ] Error types with position safety
+- [ ] Implement Rust SDK
+  - [ ] Core models (serde)
+  - [ ] REST client (reqwest)
+  - [ ] WebSocket client (tokio-tungstenite)
+  - [ ] PositionStateManager (Arc<RwLock<>>)
+  - [ ] BulkOrderManager (AtomicU64 sequence)
+  - [ ] Transaction builder (pure functions)
+  - [ ] Error types with PositionSafety enum
+- [ ] Testing
+  - [ ] Unit tests for models, formatting, address derivation
+  - [ ] Integration tests against testnet
+  - [ ] Benchmarks (serialization, tx build, sign)
+  - [ ] Agent scenario tests
 
-### Phase 3: Validation
-- [ ] Run agent scenario tests
-- [ ] Measure performance against targets
-- [ ] Validate LLM tool integration
-- [ ] Documentation review
+### Phase 3: Go SDK (Future)
+- [ ] Implement Go SDK based on spec
+- [ ] Channel-based WebSocket subscriptions
+- [ ] goroutine-per-strategy examples
+- [ ] Integration tests
+
+### Phase 4: Validation
+- [ ] Run all benchmarks, compare to spec targets
+- [ ] Market making bot end-to-end test on testnet
+- [ ] LLM agent integration test
+- [ ] Gas cost analysis validation
