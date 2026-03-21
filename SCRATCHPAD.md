@@ -1,22 +1,18 @@
 # Scratchpad
 
-## Status: COMPLETE
+## Task: Error Types and Utility Modules for Rust v2 SDK
 
-## Completed Tasks
+### Status: COMPLETE
 
-### Package 1: `decibel/state/`
-- `position_manager.py` — PositionStateManager: thread-safe in-memory cache for positions, orders, overviews, market data
-- `order_tracker.py` — OrderLifecycleTracker with OrderState enum, callbacks, history
-- `risk_monitor.py` — RiskMonitor with liquidation distance, margin warnings, funding accrual, unprotected positions
-- `__init__.py` — exports all three classes
+All files created with full implementations and passing tests:
+- `sdk-rust-v2/src/error.rs` — 14 error variants with position safety classification, retryability, criticality checks (25 tests)
+- `sdk-rust-v2/src/utils/mod.rs` — Re-exports address, formatting, nonce submodules
+- `sdk-rust-v2/src/utils/address.rs` — Market/subaccount/vault address derivation via SHA3-256 (12 tests)
+- `sdk-rust-v2/src/utils/formatting.rs` — Chain unit conversion, tick/lot rounding (17 tests)
+- `sdk-rust-v2/src/utils/nonce.rs` — Random u64 replay protection nonce (4 tests)
+- `sdk-rust-v2/src/lib.rs` — Updated to export error and utils modules
 
-### Package 2: `decibel/bulk/`
-- `order_manager.py` — BulkOrderManager with BulkQuoteResult, FillSummary models
-- `__init__.py` — exports all three classes
-
-## Test Results
-All 77 tests passing:
-- 12 order tracker tests
-- 36 position manager tests  
-- 15 risk monitor tests
-- 14 bulk order manager tests
+### Notes
+- Trimmed Cargo.toml to only include dependencies needed by current modules (serde, thiserror, sha3, hex, rand)
+- Removed stub modules (config, models, state, bulk) that referenced unavailable deps
+- 65 tests all passing

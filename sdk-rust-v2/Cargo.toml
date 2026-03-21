@@ -1,0 +1,18 @@
+[package]
+name = "decibel-sdk-v2"
+version = "2.0.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Decibel perpetual futures SDK — trading bot and AI agent first"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+rand = "0.8"
+sha3 = "0.10"
+hex = "0.4"
+
+[dev-dependencies]
+serde_json = "1"
