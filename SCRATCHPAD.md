@@ -1,17 +1,24 @@
 # Scratchpad
 
-## Current Task
-Create state management and bulk order packages for the Rust v2 SDK.
+## Task: Create example trading bots for Rust v2 SDK
 
-## Status: COMPLETE
-All files created, compiled, 216 tests passing (47 new).
+### Status: Complete
 
-## Files Created/Modified
-- `sdk-rust-v2/src/state/mod.rs` — Re-exports PositionStateManager, OrderLifecycleTracker, RiskMonitor
-- `sdk-rust-v2/src/state/position_manager.rs` — Thread-safe state manager with parking_lot::RwLock
-- `sdk-rust-v2/src/state/order_tracker.rs` — Order lifecycle tracking with state history
-- `sdk-rust-v2/src/state/risk.rs` — Risk monitor with liquidation distance, margin warnings, unprotected positions
-- `sdk-rust-v2/src/bulk/mod.rs` — Re-exports BulkOrderManager, BulkQuoteResult, FillSummary
-- `sdk-rust-v2/src/bulk/order_manager.rs` — Atomic quote management with fill tracking
-- `sdk-rust-v2/src/lib.rs` — Added state and bulk module declarations
-- `sdk-rust-v2/Cargo.toml` — Added parking_lot dependency
+### Completed
+- Read crate structure (Cargo.toml, lib.rs, all source modules)
+- Created 5 example trading bots in `sdk-rust-v2/examples/`
+- Updated Cargo.toml with dev-dependencies (tokio, reqwest with rustls-tls) and example entries
+- Created examples/README.md with setup instructions
+- All examples compile with `cargo build --examples`
+- All 228 existing tests pass
+
+### Files Created
+1. `sdk-rust-v2/examples/01_market_monitor.rs` - Read-only market dashboard (HTTP)
+2. `sdk-rust-v2/examples/02_account_dashboard.rs` - Account monitoring (HTTP)
+3. `sdk-rust-v2/examples/03_place_and_manage_orders.rs` - Order param computation (offline)
+4. `sdk-rust-v2/examples/04_market_making_bot.rs` - Market making loop (offline, BulkOrderManager)
+5. `sdk-rust-v2/examples/05_risk_watchdog.rs` - Risk monitoring (offline, PositionStateManager + RiskMonitor)
+6. `sdk-rust-v2/examples/README.md` - Setup and usage instructions
+
+### Files Modified
+- `sdk-rust-v2/Cargo.toml` - Added dev-dependencies and [[example]] entries
