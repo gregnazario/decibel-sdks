@@ -36,6 +36,8 @@
 - [ ] Testing
     - [x] TDD test files for all models (market, account, order, enums, trade, pagination)
     - [x] conftest.py with fixtures, factories, mock state managers
+    - [x] BDD feature files (7 Gherkin files covering position state, order lifecycle, bulk orders, risk monitoring, reconnection, error safety, price formatting)
+    - [ ] BDD step definitions (pytest-bdd step implementations)
     - [ ] Unit tests for formatting, address derivation
     - [ ] Integration tests against testnet
     - [ ] Benchmarks (serialization, tx build, sign)

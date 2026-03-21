@@ -47,3 +47,18 @@ Created 11 specification documents under `docs/v2/` for agent-first SDK design t
 - Pin enum wire values to prevent silent API breakage
 
 **Files created**: conftest.py, test_market.py, test_account.py, test_order.py, test_enums.py, test_trade.py, test_pagination.py
+
+### Task 4: Create BDD Feature Files (Gherkin)
+
+**Request**: Write 7 BDD feature files in Gherkin format describing high-level trading bot behaviors.
+
+**Approach**: Read all existing SDK source — models (order.py, account.py, market.py, enums.py, common.py), errors.py, client (websocket.py, read.py, write.py), existing TDD tests (test_position_manager.py, test_order_tracker.py, test_errors.py), and config.py — to ground scenarios in actual SDK APIs and field names.
+
+**Files created** (under `tests/bdd/features/`):
+1. `position_state.feature` — 9 scenarios covering WS bootstrap, live updates, sync reads, flat positions, multi-subaccount, net/gross exposure, mark price, depth
+2. `order_lifecycle.feature` — 7 scenarios covering placement, WS updates, partial/full fill, cancel, client_order_id lookup
+3. `bulk_orders.feature` — 8 scenarios covering two-sided quotes, atomic replace, sequence numbers, fill tracking, cancel_all, max levels, one-sided
+4. `risk_monitoring.feature` — 8 scenarios covering liquidation distance, margin warnings, funding accrual, unprotected positions, risk summary, auto-reactions
+5. `reconnection.feature` — 7 scenarios covering auto-reconnect, subscription restore, REST re-sync, gap_detected, trading pause, full recovery, multiple disconnections
+6. `error_safety.feature` — 7 scenarios covering SAFE/UNKNOWN/STALE/CRITICAL classification with concrete error types
+7. `price_formatting.feature` — 6 scenarios covering human↔chain conversion, rounding, clamping, raw mode, round-trip fidelity

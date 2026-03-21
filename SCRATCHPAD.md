@@ -14,6 +14,20 @@ Created 7 test files under `decibel-sdk-python/tests/`:
 6. **unit/models/test_trade.py** — UserTradeHistoryItem (net_pnl, notional, rebate handling), UserFundingHistoryItem, UserFundHistoryItem
 7. **unit/models/test_pagination.py** — PageParams (defaults, validation), SortParams, PaginatedResponse[T] (int, str, model items, empty, roundtrip)
 
+## BDD Feature Files Created
+
+Created 7 Gherkin feature files under `decibel-sdk-python/tests/bdd/features/`:
+
+1. **position_state.feature** — 9 scenarios: initial WS snapshot, live updates, sync reads, flat/closed positions, multi-subaccount, net exposure, gross exposure, mark price subscription, depth subscription
+2. **order_lifecycle.feature** — 7 scenarios: placement with order_id, WS open_orders, partial fill, full fill, cancel, client_order_id in WS/REST, client_order_id after restart
+3. **bulk_orders.feature** — 8 scenarios: initial two-sided quotes, atomic replacement, sequence auto-increment, fill tracking, fill summary, cancel_all, max 30 levels, one-sided quoting
+4. **risk_monitoring.feature** — 8 scenarios: liquidation distance (long/short), margin warning 80%, margin critical 90%, funding accrual, unprotected positions, risk summary, auto-pause, auto TP/SL
+5. **reconnection.feature** — 7 scenarios: auto-reconnect with backoff, subscription restoration, REST re-sync, gap_detected flag, trading pause, full recovery flow, multiple disconnections with backoff cap
+6. **error_safety.feature** — 7 scenarios: ValidationError SAFE, RateLimitError SAFE, SubmissionError UNKNOWN, VmError UNKNOWN cancel, CriticalTradingError SL, CriticalTradingError cancel-all, WebSocketError STALE
+7. **price_formatting.feature** — 6 scenarios: human→chain price, human→chain size with lot_size rounding, min_size clamping, tick_size rounding (buy down/sell up), raw mode bypass, round-trip fidelity
+
+All scenarios use concrete numbers from the actual SDK models (BTC-USD ~$60k, ETH-USD ~$3k, realistic margin/funding/lot/tick values).
+
 ## V2 Specification — Second Pass (Trading Bot & Agent Deep Dive)
 
 ### What Changed
