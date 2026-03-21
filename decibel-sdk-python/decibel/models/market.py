@@ -20,7 +20,7 @@ class PerpMarketConfig(BaseModel):
         taker_in_next_block: Whether taker fills in next block
     """
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, frozen=True)
 
     market_addr: str
     market_name: str
@@ -35,24 +35,27 @@ class PerpMarketConfig(BaseModel):
     taker_in_next_block: bool
 
     @property
-    def min_size_decimal(self) -> float:
-        """Minimum order size in human-readable units."""
-        return self.min_size / (10 ** self.sz_decimals)
+    def min_size_decimal(self):
+        """Minimum order size as a Decimal for precise arithmetic."""
+        from decimal import Decimal
+        return Decimal(str(self.min_size))
 
     @property
-    def lot_size_decimal(self) -> float:
-        """Lot size in human-readable units."""
-        return self.lot_size / (10 ** self.sz_decimals)
+    def lot_size_decimal(self):
+        """Lot size as a Decimal for precise arithmetic."""
+        from decimal import Decimal
+        return Decimal(str(self.lot_size))
 
     @property
-    def tick_size_decimal(self) -> float:
-        """Tick size in human-readable units."""
-        return self.tick_size / (10 ** self.px_decimals)
+    def tick_size_decimal(self):
+        """Tick size as a Decimal for precise arithmetic."""
+        from decimal import Decimal
+        return Decimal(str(self.tick_size))
 
     @property
     def mm_fraction(self) -> float:
-        """Maintenance margin fraction: 1 / (max_leverage * 2)."""
-        return 1.0 / (self.max_leverage * 2)
+        """Margin call fee as a fraction (margin_call_fee_pct / 100)."""
+        return self.margin_call_fee_pct / 100.0
 
 
 class MarketOrder(BaseModel):
@@ -150,8 +153,8 @@ class MarketPrice(BaseModel):
 
     @property
     def funding_rate_hourly(self) -> float:
-        """Funding rate annualized as hourly percentage."""
-        return self.funding_rate_bps / 10000 * 365 * 24
+        """Funding rate as a per-hour decimal (bps / 10000)."""
+        return self.funding_rate_bps / 10_000
 
     @property
     def funding_direction(self) -> str:
@@ -212,13 +215,13 @@ class Candlestick(BaseModel):
 
     @property
     def body_pct(self) -> float:
-        """Body size as % of open price. Positive = bullish."""
-        return (self.c - self.o) / self.o * 100 if self.o != 0 else 0.0
+        """Body size as fraction of open: abs(close - open) / open."""
+        return abs(self.c - self.o) / self.o if self.o != 0 else 0.0
 
     @property
     def range_pct(self) -> float:
-        """High-low range as % of open price."""
-        return (self.h - self.l) / self.o * 100 if self.o != 0 else 0.0
+        """High-low range as fraction of low: (high - low) / low."""
+        return (self.h - self.l) / self.l if self.l != 0 else 0.0
 
 
 class MarketTrade(BaseModel):

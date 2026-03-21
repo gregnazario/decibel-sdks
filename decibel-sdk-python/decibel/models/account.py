@@ -58,10 +58,10 @@ class AccountOverview(BaseModel):
 
     @property
     def margin_usage_pct(self) -> float:
-        """Percentage of equity used as margin."""
+        """Fraction of equity used as margin (0.0–1.0). 0.25 = 25%."""
         if self.perp_equity_balance == 0:
             return 0.0
-        return (self.total_margin / self.perp_equity_balance) * 100
+        return self.total_margin / self.perp_equity_balance
 
     @property
     def liquidation_buffer_usd(self) -> float:
@@ -70,14 +70,18 @@ class AccountOverview(BaseModel):
 
     @property
     def liquidation_buffer_pct(self) -> float:
-        """Percentage buffer above maintenance margin."""
-        if self.maintenance_margin == 0:
-            return float('inf')
-        return (self.perp_equity_balance / self.maintenance_margin - 1) * 100
+        """Fraction of equity remaining before liquidation (0.0–1.0).
 
-    def is_liquidation_warning(self, threshold_pct: float = 50.0) -> bool:
-        """True if buffer is below threshold_pct."""
-        return self.liquidation_buffer_pct < threshold_pct
+        liquidation_buffer_usd / perp_equity_balance.
+        """
+        if self.perp_equity_balance == 0:
+            return 0.0
+        return self.liquidation_buffer_usd / self.perp_equity_balance
+
+    @property
+    def is_liquidation_warning(self) -> bool:
+        """True if liquidation buffer is below 10% of equity."""
+        return self.liquidation_buffer_pct < 0.10
 
     @property
     def total_withdrawable(self) -> float:
@@ -140,30 +144,30 @@ class UserPosition(BaseModel):
         if self.size < 0: return "short"
         return "flat"
 
-    def notional(self, mark_price: float) -> float:
-        """Position notional at given mark price."""
-        return abs(self.size) * mark_price
+    @property
+    def notional(self) -> float:
+        """Position notional based on entry price: abs(size) * entry_price."""
+        return abs(self.size) * self.entry_price
 
-    def unrealized_pnl(self, mark_price: float) -> float:
+    def unrealized_pnl(self, mark_px: float) -> float:
         """Unrealized PnL excluding funding."""
-        return (mark_price - self.entry_price) * self.size
+        return (mark_px - self.entry_price) * self.size
 
-    def unrealized_pnl_pct(self, mark_price: float) -> float:
-        """Unrealized PnL as % of entry notional."""
-        entry_notional = abs(self.size) * self.entry_price
-        if entry_notional == 0:
+    def unrealized_pnl_pct(self, mark_px: float) -> float:
+        """Unrealized PnL as fraction of entry notional."""
+        if self.notional == 0:
             return 0.0
-        return self.unrealized_pnl(mark_price) / entry_notional * 100
+        return self.unrealized_pnl(mark_px) / self.notional
 
-    def total_unrealized_pnl(self, mark_price: float) -> float:
+    def total_unrealized_pnl(self, mark_px: float) -> float:
         """Unrealized PnL including funding."""
-        return self.unrealized_pnl(mark_price) + self.unrealized_funding
+        return self.unrealized_pnl(mark_px) + self.unrealized_funding
 
-    def liquidation_distance_pct(self, mark_price: float) -> float:
-        """Percentage distance from current price to estimated liquidation."""
-        if self.estimated_liquidation_price == 0 or mark_price == 0:
+    def liquidation_distance_pct(self, mark_px: float) -> float:
+        """Fractional distance from current price to estimated liquidation (0.10 = 10%)."""
+        if self.estimated_liquidation_price == 0 or mark_px == 0:
             return float('inf')
-        return abs(mark_price - self.estimated_liquidation_price) / mark_price * 100
+        return abs(mark_px - self.estimated_liquidation_price) / mark_px
 
     @property
     def has_tp(self) -> bool:
@@ -216,9 +220,10 @@ class UserOpenOrder(BaseModel):
 
     @property
     def fill_pct(self) -> float:
+        """Fraction of original order that has been filled (0.0–1.0)."""
         if self.orig_size == 0:
             return 0.0
-        return (self.filled_size / self.orig_size) * 100
+        return self.filled_size / self.orig_size
 
     @property
     def side(self) -> str:
@@ -226,11 +231,17 @@ class UserOpenOrder(BaseModel):
 
     @property
     def notional(self) -> float:
-        """Remaining notional = remaining_size * price."""
-        return self.remaining_size * self.price
+        """Full order notional = orig_size * price."""
+        return self.orig_size * self.price
 
-    def age_ms(self, now_ms: int) -> int:
-        """Milliseconds since order was placed."""
+    def age_ms(self, now_ms: int | None = None) -> int:
+        """Milliseconds since order was placed.
+
+        If now_ms is not provided, uses current wall-clock time.
+        """
+        if now_ms is None:
+            import time
+            now_ms = int(time.time() * 1000)
         return now_ms - self.transaction_unix_ms
 
 
@@ -301,10 +312,9 @@ class UserTradeHistoryItem(BaseModel):
 
     @property
     def net_pnl(self) -> float:
-        """Net PnL after fees and funding.
+        """Net PnL: realized_pnl + funding - fee (or + fee if rebate).
 
-        If is_rebate is True, fee_amount is added (maker rebate).
-        Otherwise fee_amount is subtracted.
+        All-in profit or loss for a single trade event.
         """
         pnl = self.realized_pnl_amount + self.realized_funding_amount
         if self.is_rebate:

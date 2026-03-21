@@ -229,17 +229,17 @@ class TestUserTradeHistoryItem:
         assert btc_trade_history_item.notional == pytest.approx(47_500.0)
 
     def test_trade_history_item_net_pnl_profit(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
-        """net_pnl = realized_pnl - fee for a profitable trade.
+        """net_pnl = realized_pnl + funding - fee for a profitable trade.
 
-        $500 realized PnL - $7.50 fee = $492.50 net.
+        $500 PnL + $5.00 funding - $7.50 fee = $497.50 net.
         Trading bots use net_pnl (not gross) for true strategy evaluation.
         """
-        assert btc_trade_history_item.net_pnl == pytest.approx(492.50)
+        assert btc_trade_history_item.net_pnl == pytest.approx(497.50)
 
     def test_trade_history_item_net_pnl_with_rebate(self) -> None:
         """net_pnl adds the fee back when is_rebate is True.
 
-        Maker rebates reduce effective costs: $500 + $2.00 rebate = $502.00.
+        Maker rebates reduce effective costs: $500 PnL + $5 funding + $2 rebate = $507.
         """
         item = UserTradeHistoryItem(
             account="0xsub1",
@@ -256,12 +256,12 @@ class TestUserTradeHistoryItem:
             transaction_unix_ms=NOW_MS,
             transaction_version=100_004,
         )
-        assert item.net_pnl == pytest.approx(502.0)
+        assert item.net_pnl == pytest.approx(507.0)
 
     def test_trade_history_item_net_pnl_loss(self) -> None:
-        """net_pnl for a losing trade: negative PnL minus fee.
+        """net_pnl for a losing trade: PnL + funding - fee.
 
-        -$300 PnL - $5.00 fee = -$305.00.
+        -$300 PnL + $1.00 funding - $5.00 fee = -$304.00.
         """
         item = UserTradeHistoryItem(
             account="0xsub1",
@@ -278,7 +278,7 @@ class TestUserTradeHistoryItem:
             transaction_unix_ms=NOW_MS,
             transaction_version=100_005,
         )
-        assert item.net_pnl == pytest.approx(-305.0)
+        assert item.net_pnl == pytest.approx(-304.0)
 
     def test_trade_history_item_action_enum(self, btc_trade_history_item: UserTradeHistoryItem) -> None:
         """action field is a TradeAction enum, not a raw string.

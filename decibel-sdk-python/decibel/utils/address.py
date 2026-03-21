@@ -33,7 +33,7 @@ def get_primary_subaccount_addr(
         Derived primary subaccount address
     """
     addr_bytes = _hex_to_bytes(account_addr)
-    seed = f"{_strip_hex_prefix(package_addr)}::dex_accounts::primary_account"
+    seed = f"{_strip_hex_prefix(package_addr)}::dex_accounts::{compat_version}::primary_account"
     object_addr = _create_object_address(addr_bytes, seed.encode())
     return f"0x{object_addr.hex()}"
 
