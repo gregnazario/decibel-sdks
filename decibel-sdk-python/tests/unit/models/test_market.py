@@ -87,12 +87,12 @@ class TestPerpMarketConfig:
         result = btc_perp_config.tick_size_decimal
         assert result == Decimal("0.1")
 
-    def test_perp_market_config_mm_fraction(self, btc_perp_config: PerpMarketConfig) -> None:
-        """mm_fraction returns margin_call_fee_pct as a ratio.
+    def test_perp_market_config_margin_call_fee_fraction(self, btc_perp_config: PerpMarketConfig) -> None:
+        """margin_call_fee_fraction returns margin_call_fee_pct as a fraction.
 
         Used by risk engines to compute the margin-call fee buffer.
         """
-        assert btc_perp_config.mm_fraction == pytest.approx(0.005)
+        assert btc_perp_config.margin_call_fee_fraction == pytest.approx(0.005)
 
     def test_perp_market_config_frozen(self) -> None:
         """PerpMarketConfig should be immutable once created.

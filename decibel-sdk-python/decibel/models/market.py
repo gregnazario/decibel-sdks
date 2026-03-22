@@ -57,11 +57,6 @@ class PerpMarketConfig(BaseModel):
         """Margin call fee as a fraction (e.g., 0.005 for 0.5%)."""
         return self.margin_call_fee_pct
 
-    @property
-    def mm_fraction(self) -> float:
-        """Alias for margin_call_fee_fraction (backward compatibility)."""
-        return self.margin_call_fee_fraction
-
 
 class MarketOrder(BaseModel):
     """Single order in the order book.
