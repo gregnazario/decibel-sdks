@@ -83,3 +83,13 @@ class TwapOrderResult(BaseModel):
     success: bool
     order_id: str | None = None
     transaction_hash: str
+
+
+class TransactionResult(BaseModel):
+    """Generic result for any on-chain transaction."""
+    success: bool
+    transaction_hash: str | None = None
+    transaction_version: int | None = None
+    gas_used: int | None = None
+    vm_status: str | None = None
+    error: str | None = None

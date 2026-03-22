@@ -1,6 +1,6 @@
 """Ed25519 transaction signer."""
 
-from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 
@@ -91,7 +91,3 @@ class Ed25519Signer:
 
         private_key = secrets.token_bytes(32)
         return cls(private_key)
-
-
-# Import serialization at module level
-from cryptography.hazmat.primitives import serialization

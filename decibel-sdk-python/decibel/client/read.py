@@ -1,6 +1,7 @@
 """REST API client for read operations."""
 
-from typing import Any, Callable, Generic, TypeVar
+from collections.abc import Callable
+from typing import Any, Generic, TypeVar
 
 import httpx
 
@@ -11,8 +12,8 @@ from ..models.account import (
     Delegation,
     LeaderboardItem,
     PortfolioChartData,
-    UserFundingHistoryItem,
     UserFundHistoryItem,
+    UserFundingHistoryItem,
     UserOpenOrder,
     UserOrderHistoryItem,
     UserPosition,
@@ -50,7 +51,6 @@ class ApiResponse(Generic[T]):
         self.status_text = status_text
 
 
-import typing
 
 
 class DecibelReadClient:

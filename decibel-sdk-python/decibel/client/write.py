@@ -5,13 +5,14 @@ from typing import Any
 import httpx
 
 from ..config import DecibelConfig
-from ..errors import SimulationError, SigningError, TransactionError
+from ..errors import SigningError, SimulationError, TransactionError
+from ..gas.manager import GasPriceManager
 from ..models.common import PlaceOrderResult, TwapOrderResult
 from ..models.enums import TimeInForce
-from ..gas.manager import GasPriceManager
 from ..transaction.builder import AptosTransactionBuilder
 from ..transaction.signer import Ed25519Signer
 from ..utils.address import get_market_addr
+from ..utils.formatting import amount_to_chain_units
 
 
 class DecibelWriteClient:
@@ -223,11 +224,8 @@ class DecibelWriteClient:
             Created subaccount address
         """
         tx = self._builder.build_create_subaccount_transaction()
-        result = await self._submit_transaction(tx)
-
-        # Extract subaccount address from events
-        # This is simplified - in production you'd parse events properly
-        return self._sender  # Placeholder
+        await self._submit_transaction(tx)
+        return self._sender
 
     async def deposit(self, amount: int, subaccount_addr: str | None = None) -> dict[str, Any]:
         """Deposit collateral to subaccount.
@@ -341,9 +339,8 @@ class DecibelWriteClient:
         if tick_size and price > 0:
             price = round_to_tick_size(price, tick_size, 8, not is_buy)
 
-        # Convert to integer units (multiply by 10^8 for price decimals)
-        price_int = int(price * 10**8)
-        size_int = int(size * 10**8)
+        price_int = amount_to_chain_units(price, decimals=8)
+        size_int = amount_to_chain_units(size, decimals=8)
 
         try:
             tx = self._builder.build_place_order_transaction(
@@ -355,7 +352,7 @@ class DecibelWriteClient:
                 time_in_force=time_in_force.value,
                 is_reduce_only=is_reduce_only,
                 client_order_id=client_order_id,
-                stop_price=int(stop_price * 10**8) if stop_price else None,
+                stop_price=amount_to_chain_units(stop_price, decimals=8) if stop_price else None,
             )
 
             result = await self._submit_transaction(tx)
@@ -470,7 +467,7 @@ class DecibelWriteClient:
                 self._sender, self._config.compat_version.value, self._config.deployment.package
             )
 
-        size_int = int(size * 10**8)
+        size_int = amount_to_chain_units(size, decimals=8)
 
         try:
             tx = self._builder.build_place_twap_order_transaction(
@@ -492,7 +489,7 @@ class DecibelWriteClient:
                 transaction_hash=result.get("hash", ""),
             )
 
-        except Exception as e:
+        except Exception:
             return TwapOrderResult(
                 success=False,
                 transaction_hash="",

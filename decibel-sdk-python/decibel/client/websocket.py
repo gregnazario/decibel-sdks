@@ -2,7 +2,8 @@
 
 import asyncio
 import json
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import websockets
 from websockets.exceptions import ConnectionClosed
@@ -20,7 +21,6 @@ from ..models.account import (
 from ..models.enums import CandlestickInterval
 from ..models.market import Candlestick, MarketDepth, MarketPrice, MarketTrade
 from ..models.order import UserActiveTwap
-
 
 Callback = Callable[[Any], None]
 

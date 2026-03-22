@@ -1,46 +1,13 @@
 # Conversation Log
 
-## Task: Build Cross-Platform SDKs for Decibel
+## 2026-03-22: Fix float precision issues in Decibel Python SDK
 
-### Phase 1: Research & Specification
-1. Explored the Decibel documentation at https://docs.decibel.trade/
-2. Downloaded and analyzed the TypeScript SDK (`@decibeltrade/sdk` v0.3.1) from npm
-3. Mapped all 100+ API endpoints from the sitemap
-4. Read all TypeScript declaration files to understand the full API surface
-5. Created comprehensive specification document (docs/specification.md) - iterated 5 times
+**Request:** Rewrite formatting.py and price.py to use `decimal.Decimal` for all chain unit conversions, and fix write.py to use `amount_to_chain_units` instead of raw `int(x * 10**8)`.
 
-### Phase 2: Planning
-1. Created PLAN.md with phased implementation approach
-2. Defined TDD/BDD methodology for all SDKs
-3. Established language-specific idioms for Rust, Swift, Kotlin, Go
-
-### Phase 3: Rust SDK Implementation
-1. Created full project structure with Cargo.toml
-2. Implemented all data models (market, account, order, position, vault, websocket)
-3. Built REST API client with all endpoints
-4. Built WebSocket subscription manager
-5. Built write client with order management, TWAP, TP/SL, delegation, vaults
-6. Implemented transaction builder and gas price manager
-7. Implemented utility functions
-8. Wrote 59 BDD tests - all passing
-
-### Phase 4: Go SDK Implementation
-1. Created Go module with proper dependencies
-2. Implemented all data models with JSON struct tags
-3. Built configuration with presets
-4. Implemented utility functions
-5. Wrote BDD tests - all passing
-
-### Phase 5: Swift SDK Implementation
-1. Created Swift Package Manager project
-2. Implemented Codable data models
-3. Built configuration system
-4. Implemented CryptoKit-based utilities
-5. Wrote XCTest-based BDD tests
-
-### Phase 6: Kotlin SDK Implementation
-1. Created Gradle project with kotlinx.serialization
-2. Implemented data models with serialization annotations
-3. Built configuration system
-4. Implemented address derivation utilities
-5. Wrote JUnit5-based BDD tests
+**Actions taken:**
+1. Read all relevant source files and test file.
+2. Rewrote `formatting.py` with Decimal-based arithmetic for `amount_to_chain_units`, `round_to_valid_price`, `round_to_valid_order_size`, and related helpers.
+3. Rewrote `price.py` with Decimal-based `round_to_tick_size`.
+4. Fixed `write.py` — replaced 3 instances of `int(x * 10**8)` with `amount_to_chain_units(x, decimals=8)`.
+5. Ran full test suite: 392/392 passed.
+6. Committed and pushed to `cursor/v2-sdk-agent-specifications-7958`.

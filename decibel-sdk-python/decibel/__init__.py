@@ -7,10 +7,10 @@ The SDK provides:
 - Type-safe data models using Pydantic v2
 """
 
-from decibel.config import CompatVersion, DecibelConfig, Deployment, Network
 from decibel.client.read import DecibelReadClient
-from decibel.client.write import DecibelWriteClient
 from decibel.client.websocket import WebSocketManager
+from decibel.client.write import DecibelWriteClient
+from decibel.config import CompatVersion, DecibelConfig, Deployment, Network
 from decibel.errors import (
     APIError,
     ConfigError,
@@ -25,20 +25,28 @@ from decibel.errors import (
     ValidationError,
     WebSocketError,
 )
+from decibel.gas.manager import GasPriceManager
 from decibel.models.account import (
     AccountOverview,
     Delegation,
     LeaderboardItem,
     PortfolioChartData,
-    UserFundingHistoryItem,
     UserFundHistoryItem,
+    UserFundingHistoryItem,
     UserOpenOrder,
     UserOrderHistoryItem,
     UserPosition,
     UserSubaccount,
     UserTradeHistoryItem,
 )
-from decibel.models.common import PageParams, PaginatedResponse, PlaceOrderResult, SearchTermParams, SortParams, TwapOrderResult
+from decibel.models.common import (
+    PageParams,
+    PaginatedResponse,
+    PlaceOrderResult,
+    SearchTermParams,
+    SortParams,
+    TwapOrderResult,
+)
 from decibel.models.enums import (
     CandlestickInterval,
     MarketDepthAggregationSize,
@@ -50,12 +58,23 @@ from decibel.models.enums import (
     VaultType,
     VolumeWindow,
 )
-from decibel.models.market import Candlestick, MarketContext, MarketDepth, MarketOrder, MarketPrice, MarketTrade, PerpMarketConfig
+from decibel.models.market import (
+    Candlestick,
+    MarketContext,
+    MarketDepth,
+    MarketOrder,
+    MarketPrice,
+    MarketTrade,
+    PerpMarketConfig,
+)
 from decibel.models.order import OrderStatus, UserActiveTwap
 from decibel.models.vault import UserOwnedVault, UserPerformanceOnVault, Vault, VaultsResponse
 from decibel.transaction.signer import Ed25519Signer
-from decibel.gas.manager import GasPriceManager
-from decibel.utils.address import get_market_addr, get_primary_subaccount_addr, get_vault_share_address
+from decibel.utils.address import (
+    get_market_addr,
+    get_primary_subaccount_addr,
+    get_vault_share_address,
+)
 from decibel.utils.crypto import generate_random_replay_protection_nonce
 from decibel.utils.price import round_to_tick_size
 

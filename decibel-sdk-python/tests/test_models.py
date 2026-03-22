@@ -1,7 +1,5 @@
 """Tests for data models."""
 
-import pytest
-from pydantic import ValidationError
 
 from decibel.models.account import AccountOverview, UserPosition
 from decibel.models.common import PageParams, PaginatedResponse, PlaceOrderResult
@@ -9,17 +7,13 @@ from decibel.models.enums import (
     CandlestickInterval,
     MarketDepthAggregationSize,
     OrderStatusType,
-    SortDirection,
     TimeInForce,
-    TwapStatus,
-    VaultType,
-    VolumeWindow,
 )
-from decibel.models.market import MarketDepth, MarketOrder, MarketPrice, PerpMarketConfig
+from decibel.models.market import MarketDepth, MarketPrice, PerpMarketConfig
 
 
 def test_perp_market_config_model():
-    """Test PerpMarketConfig model."""
+    """Test PerpMarketConfig model — all fields preserved through construction."""
     data = {
         "market_addr": "0x123",
         "market_name": "BTC-USD",
@@ -34,12 +28,21 @@ def test_perp_market_config_model():
         "taker_in_next_block": True,
     }
     market = PerpMarketConfig(**data)
+    assert market.market_addr == "0x123"
     assert market.market_name == "BTC-USD"
+    assert market.sz_decimals == 8
+    assert market.px_decimals == 8
     assert market.max_leverage == 10.0
+    assert market.min_size == 0.001
+    assert market.lot_size == 0.001
+    assert market.tick_size == 0.01
+    assert market.max_open_interest == 1000000.0
+    assert market.margin_call_fee_pct == 0.005
+    assert market.taker_in_next_block is True
 
 
 def test_market_price_model():
-    """Test MarketPrice model."""
+    """Test MarketPrice model — all 8 fields preserved through construction."""
     data = {
         "market": "BTC-USD",
         "mark_px": 45000.0,
@@ -53,10 +56,16 @@ def test_market_price_model():
     price = MarketPrice(**data)
     assert price.market == "BTC-USD"
     assert price.mark_px == 45000.0
+    assert price.mid_px == 45000.5
+    assert price.oracle_px == 45001.0
+    assert price.funding_rate_bps == 0.01
+    assert price.is_funding_positive is True
+    assert price.open_interest == 1000.0
+    assert price.transaction_unix_ms == 1708000000000
 
 
 def test_market_depth_model():
-    """Test MarketDepth model."""
+    """Test MarketDepth model — bids, asks, and nested PriceLevel fields."""
     data = {
         "market": "BTC-USD",
         "bids": [{"price": 44999.0, "size": 1.5}, {"price": 44998.0, "size": 2.0}],
@@ -64,12 +73,22 @@ def test_market_depth_model():
         "unix_ms": 1708000000000,
     }
     depth = MarketDepth(**data)
+    assert depth.market == "BTC-USD"
     assert len(depth.bids) == 2
     assert depth.bids[0].price == 44999.0
+    assert depth.bids[0].size == 1.5
+    assert depth.bids[1].price == 44998.0
+    assert depth.bids[1].size == 2.0
+    assert len(depth.asks) == 2
+    assert depth.asks[0].price == 45001.0
+    assert depth.asks[0].size == 1.0
+    assert depth.asks[1].price == 45002.0
+    assert depth.asks[1].size == 3.0
+    assert depth.unix_ms == 1708000000000
 
 
 def test_account_overview_model():
-    """Test AccountOverview model."""
+    """Test AccountOverview model — all required fields preserved."""
     data = {
         "perp_equity_balance": 10000.0,
         "unrealized_pnl": 500.0,
@@ -84,10 +103,17 @@ def test_account_overview_model():
     overview = AccountOverview(**data)
     assert overview.perp_equity_balance == 10000.0
     assert overview.unrealized_pnl == 500.0
+    assert overview.unrealized_funding_cost == 10.0
+    assert overview.cross_margin_ratio == 0.5
+    assert overview.maintenance_margin == 100.0
+    assert overview.cross_account_position == 5000.0
+    assert overview.total_margin == 2000.0
+    assert overview.usdc_cross_withdrawable_balance == 8000.0
+    assert overview.usdc_isolated_withdrawable_balance == 0.0
 
 
 def test_user_position_model():
-    """Test UserPosition model."""
+    """Test UserPosition model — all fields including nullable TP/SL."""
     data = {
         "market": "0x123",
         "user": "0x456",
@@ -100,8 +126,17 @@ def test_user_position_model():
         "has_fixed_sized_tpsls": False,
     }
     position = UserPosition(**data)
+    assert position.market == "0x123"
+    assert position.user == "0x456"
     assert position.size == 1.5
+    assert position.user_leverage == 5.0
+    assert position.entry_price == 44000.0
     assert position.is_isolated is False
+    assert position.unrealized_funding == 5.0
+    assert position.estimated_liquidation_price == 40000.0
+    assert position.has_fixed_sized_tpsls is False
+    assert position.tp_order_id is None
+    assert position.sl_order_id is None
 
 
 def test_page_params_model():

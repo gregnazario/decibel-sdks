@@ -1,6 +1,6 @@
 """Account-related data models."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from .enums import TradeAction
 
@@ -56,6 +56,38 @@ class AccountOverview(BaseModel):
     liquidation_fees_paid: float | None = None
     liquidation_losses: float | None = None
 
+    @property
+    def margin_usage_pct(self) -> float:
+        """Fraction of equity used as margin (0.0–1.0). 0.25 = 25%."""
+        if self.perp_equity_balance == 0:
+            return 0.0
+        return self.total_margin / self.perp_equity_balance
+
+    @property
+    def liquidation_buffer_usd(self) -> float:
+        """USD buffer above maintenance margin."""
+        return self.perp_equity_balance - self.maintenance_margin
+
+    @property
+    def liquidation_buffer_pct(self) -> float:
+        """Fraction of equity remaining before liquidation (0.0–1.0).
+
+        liquidation_buffer_usd / perp_equity_balance.
+        """
+        if self.perp_equity_balance == 0:
+            return 0.0
+        return self.liquidation_buffer_usd / self.perp_equity_balance
+
+    @property
+    def is_liquidation_warning(self) -> bool:
+        """True if liquidation buffer is below 10% of equity."""
+        return self.liquidation_buffer_pct <= 0.10
+
+    @property
+    def total_withdrawable(self) -> float:
+        """Total withdrawable USDC."""
+        return self.usdc_cross_withdrawable_balance + self.usdc_isolated_withdrawable_balance
+
 
 class UserPosition(BaseModel):
     """User's position in a market.
@@ -94,6 +126,64 @@ class UserPosition(BaseModel):
     sl_trigger_price: float | None = None
     sl_limit_price: float | None = None
 
+    @property
+    def is_long(self) -> bool:
+        return self.size > 0
+
+    @property
+    def is_short(self) -> bool:
+        return self.size < 0
+
+    @property
+    def is_flat(self) -> bool:
+        return self.size == 0
+
+    @property
+    def direction(self) -> str:
+        if self.size > 0:
+            return "long"
+        if self.size < 0:
+            return "short"
+        return "flat"
+
+    @property
+    def notional(self) -> float:
+        """Position notional based on entry price: abs(size) * entry_price."""
+        return abs(self.size) * self.entry_price
+
+    def unrealized_pnl(self, mark_px: float) -> float:
+        """Unrealized PnL excluding funding."""
+        return (mark_px - self.entry_price) * self.size
+
+    def unrealized_pnl_pct(self, mark_px: float) -> float:
+        """Unrealized PnL as fraction of entry notional."""
+        if self.notional == 0:
+            return 0.0
+        return self.unrealized_pnl(mark_px) / self.notional
+
+    def total_unrealized_pnl(self, mark_px: float) -> float:
+        """Unrealized PnL including funding."""
+        return self.unrealized_pnl(mark_px) + self.unrealized_funding
+
+    def liquidation_distance_pct(self, mark_px: float) -> float:
+        """Fractional distance from current price to estimated liquidation (0.10 = 10%)."""
+        if self.estimated_liquidation_price == 0 or mark_px == 0:
+            return float('inf')
+        return abs(mark_px - self.estimated_liquidation_price) / mark_px
+
+    @property
+    def has_tp(self) -> bool:
+        return self.tp_order_id is not None
+
+    @property
+    def has_sl(self) -> bool:
+        return self.sl_order_id is not None
+
+    @property
+    def has_protection(self) -> bool:
+        """True if position has TP or SL."""
+        return self.has_tp or self.has_sl
+
 
 class UserOpenOrder(BaseModel):
     """Active open order.
@@ -125,6 +215,36 @@ class UserOpenOrder(BaseModel):
     transaction_unix_ms: int
     transaction_version: int
     client_order_id: str | None = None
+
+    @property
+    def filled_size(self) -> float:
+        return self.orig_size - self.remaining_size
+
+    @property
+    def fill_pct(self) -> float:
+        """Fraction of original order that has been filled (0.0–1.0)."""
+        if self.orig_size == 0:
+            return 0.0
+        return self.filled_size / self.orig_size
+
+    @property
+    def side(self) -> str:
+        return "buy" if self.is_buy else "sell"
+
+    @property
+    def notional(self) -> float:
+        """Full order notional = orig_size * price."""
+        return self.orig_size * self.price
+
+    def age_ms(self, now_ms: int | None = None) -> int:
+        """Milliseconds since order was placed.
+
+        If now_ms is not provided, uses current wall-clock time.
+        """
+        if now_ms is None:
+            import time
+            now_ms = int(time.time() * 1000)
+        return now_ms - self.transaction_unix_ms
 
 
 class UserOrderHistoryItem(BaseModel):
@@ -191,6 +311,23 @@ class UserTradeHistoryItem(BaseModel):
     fee_amount: float
     transaction_unix_ms: int
     transaction_version: int
+
+    @property
+    def net_pnl(self) -> float:
+        """Net PnL: realized_pnl + funding - fee (or + fee if rebate).
+
+        All-in profit or loss for a single trade event.
+        """
+        pnl = self.realized_pnl_amount + self.realized_funding_amount
+        if self.is_rebate:
+            pnl += self.fee_amount
+        else:
+            pnl -= self.fee_amount
+        return pnl
+
+    @property
+    def notional(self) -> float:
+        return self.size * self.price
 
 
 class UserFundingHistoryItem(BaseModel):

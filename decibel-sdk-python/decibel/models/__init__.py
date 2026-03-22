@@ -5,15 +5,23 @@ from decibel.models.account import (
     Delegation,
     LeaderboardItem,
     PortfolioChartData,
-    UserFundingHistoryItem,
     UserFundHistoryItem,
+    UserFundingHistoryItem,
     UserOpenOrder,
     UserOrderHistoryItem,
     UserPosition,
     UserSubaccount,
     UserTradeHistoryItem,
 )
-from decibel.models.common import PageParams, PaginatedResponse, PlaceOrderResult, SearchTermParams, SortParams, TwapOrderResult
+from decibel.models.common import (
+    PageParams,
+    PaginatedResponse,
+    PlaceOrderResult,
+    SearchTermParams,
+    SortParams,
+    TransactionResult,
+    TwapOrderResult,
+)
 from decibel.models.enums import (
     CandlestickInterval,
     MarketDepthAggregationSize,
@@ -25,7 +33,15 @@ from decibel.models.enums import (
     VaultType,
     VolumeWindow,
 )
-from decibel.models.market import Candlestick, MarketContext, MarketDepth, MarketOrder, MarketPrice, MarketTrade, PerpMarketConfig
+from decibel.models.market import (
+    Candlestick,
+    MarketContext,
+    MarketDepth,
+    MarketOrder,
+    MarketPrice,
+    MarketTrade,
+    PerpMarketConfig,
+)
 from decibel.models.order import OrderStatus, UserActiveTwap
 from decibel.models.vault import UserOwnedVault, UserPerformanceOnVault, Vault, VaultsResponse
 
@@ -37,6 +53,7 @@ __all__ = [
     "PaginatedResponse",
     "PlaceOrderResult",
     "TwapOrderResult",
+    "TransactionResult",
     # Enums
     "TimeInForce",
     "CandlestickInterval",

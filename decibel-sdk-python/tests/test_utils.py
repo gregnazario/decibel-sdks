@@ -1,6 +1,5 @@
 """Tests for utility functions."""
 
-import pytest
 
 from decibel.utils.address import (
     _bcs_serialize_string,
@@ -49,37 +48,68 @@ def test_bcs_serialize_string():
 
 
 def test_create_object_address():
-    """Test object address derivation."""
-    source = bytes.fromhex("1234567890abcdef" * 2)  # 16 bytes
+    """Test object address derivation produces 32 bytes and is deterministic."""
+    source = bytes.fromhex("1234567890abcdef" * 4)  # 32 bytes
     seed = b"test_seed"
     addr = _create_object_address(source, seed)
-    assert len(addr) == 32
+    assert len(addr) == 32, "Aptos object addresses are 32 bytes"
     assert isinstance(addr, bytes)
+    # Deterministic
+    addr2 = _create_object_address(source, seed)
+    assert addr == addr2, "Same inputs must produce same address"
+    # Different seed produces different address
+    addr3 = _create_object_address(source, b"other_seed")
+    assert addr != addr3, "Different seeds must produce different addresses"
 
 
 def test_get_market_addr():
-    """Test market address derivation."""
-    market_addr = get_market_addr("BTC-USD", "0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234")
-    assert market_addr.startswith("0x")
-    assert len(market_addr) == 66  # 0x + 64 hex chars
+    """Test market address derivation is deterministic and distinct per market."""
+    perp_global = "0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234"
+    btc_addr = get_market_addr("BTC-USD", perp_global)
+    assert btc_addr.startswith("0x")
+    assert len(btc_addr) == 66
+    assert btc_addr != "0x" + "00" * 32, "Must not derive to zero address"
+    # Deterministic
+    btc_addr2 = get_market_addr("BTC-USD", perp_global)
+    assert btc_addr == btc_addr2, "Same inputs must produce same address"
+    # Different market produces different address
+    eth_addr = get_market_addr("ETH-USD", perp_global)
+    assert btc_addr != eth_addr, "BTC-USD and ETH-USD must have different addresses"
 
 
 def test_get_primary_subaccount_addr():
-    """Test primary subaccount address derivation."""
-    sub_addr = get_primary_subaccount_addr(
-        "0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234",
-        "v0.4",
-        "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    )
+    """Test subaccount derivation is deterministic and varies by account."""
+    account = "0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234"
+    package = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+    sub_addr = get_primary_subaccount_addr(account, "v0.4", package)
     assert sub_addr.startswith("0x")
     assert len(sub_addr) == 66
+    assert sub_addr != "0x" + "00" * 32, "Must not derive to zero address"
+    assert sub_addr != account, "Subaccount must differ from the owner account"
+    # Deterministic
+    sub_addr2 = get_primary_subaccount_addr(account, "v0.4", package)
+    assert sub_addr == sub_addr2, "Same inputs must produce same address"
+    # Different account produces different subaccount
+    other_account = "0x" + "ff" * 32
+    other_sub = get_primary_subaccount_addr(other_account, "v0.4", package)
+    assert sub_addr != other_sub, "Different accounts must have different subaccounts"
 
 
 def test_get_vault_share_address():
-    """Test vault share address derivation."""
-    share_addr = get_vault_share_address("0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234")
+    """Test vault share address derivation is deterministic and distinct."""
+    vault = "0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234"
+    share_addr = get_vault_share_address(vault)
     assert share_addr.startswith("0x")
     assert len(share_addr) == 66
+    assert share_addr != "0x" + "00" * 32, "Must not derive to zero address"
+    assert share_addr != vault, "Share address must differ from vault address"
+    # Deterministic
+    share_addr2 = get_vault_share_address(vault)
+    assert share_addr == share_addr2, "Same input must produce same address"
+    # Different vault produces different share address
+    other_vault = "0x" + "ab" * 32
+    other_share = get_vault_share_address(other_vault)
+    assert share_addr != other_share, "Different vaults must have different share addresses"
 
 
 def test_round_to_tick_size():
