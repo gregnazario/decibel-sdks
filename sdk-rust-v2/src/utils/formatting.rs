@@ -1,9 +1,21 @@
-/// Convert a human-readable amount to on-chain integer units.
+/// Convert a decimal amount to integer chain units.
 ///
-/// E.g. `amount_to_chain_units(1.5, 6)` => `1_500_000`.
+/// Uses string-based conversion to avoid binary floating-point
+/// representation errors that can cause off-by-one chain units.
+///
+/// # Examples
+/// ```
+/// use decibel_sdk_v2::utils::formatting::amount_to_chain_units;
+/// assert_eq!(amount_to_chain_units(5.67, 9), 5_670_000_000);
+/// assert_eq!(amount_to_chain_units(1.005, 6), 1_005_000);
+/// ```
 pub fn amount_to_chain_units(amount: f64, decimals: u32) -> u64 {
-    let factor = 10u64.pow(decimals) as f64;
-    (amount * factor).round() as u64
+    let formatted = format!("{:.prec$}", amount, prec = decimals as usize);
+    let without_dot = formatted.replace('.', "");
+    let cleaned = without_dot.trim_start_matches('-');
+    cleaned.parse::<u64>().unwrap_or_else(|_| {
+        (amount.abs() * 10_f64.powi(decimals as i32)).round() as u64
+    })
 }
 
 /// Convert on-chain integer units back to a human-readable float.
@@ -15,19 +27,25 @@ pub fn chain_units_to_amount(chain_units: u64, decimals: u32) -> f64 {
 }
 
 /// Round a price to the nearest valid tick and truncate to the given decimal places.
+///
+/// Uses string formatting for the final decimal truncation to avoid
+/// compounding float errors from `(rounded * factor).round() / factor`.
 pub fn round_to_valid_price(price: f64, tick_size: f64, px_decimals: u32) -> f64 {
     if tick_size <= 0.0 {
         return price;
     }
     let ticks = (price / tick_size).round();
     let rounded = ticks * tick_size;
-    let factor = 10f64.powi(px_decimals as i32);
-    (rounded * factor).round() / factor
+    let formatted = format!("{:.prec$}", rounded, prec = px_decimals as usize);
+    formatted.parse::<f64>().unwrap_or(rounded)
 }
 
 /// Round an order size down to the nearest valid lot and enforce minimum size.
 ///
 /// Returns 0.0 if the rounded size is below `min_size`.
+///
+/// Uses string-based truncation for the final decimal floor to avoid
+/// float noise from `(rounded * factor).floor() / factor`.
 pub fn round_to_valid_order_size(
     size: f64,
     lot_size: f64,
@@ -39,8 +57,22 @@ pub fn round_to_valid_order_size(
     }
     let lots = (size / lot_size).floor();
     let rounded = lots * lot_size;
-    let factor = 10f64.powi(sz_decimals as i32);
-    let truncated = (rounded * factor).floor() / factor;
+
+    // Format with extra precision so that format!'s rounding cleans up float
+    // noise, then truncate the string to exactly `sz_decimals` fractional digits.
+    let extra = sz_decimals as usize + 6;
+    let formatted = format!("{:.prec$}", rounded, prec = extra);
+    let truncated = if let Some(dot_pos) = formatted.find('.') {
+        if sz_decimals == 0 {
+            formatted[..dot_pos].parse::<f64>().unwrap_or(0.0)
+        } else {
+            let end = (dot_pos + 1 + sz_decimals as usize).min(formatted.len());
+            formatted[..end].parse::<f64>().unwrap_or(0.0)
+        }
+    } else {
+        formatted.parse::<f64>().unwrap_or(0.0)
+    };
+
     if truncated < min_size {
         return 0.0;
     }
@@ -82,6 +114,12 @@ mod tests {
     fn amount_to_chain_units_large_value() {
         let chain = amount_to_chain_units(1_000_000.0, 6);
         assert_eq!(chain, 1_000_000_000_000);
+    }
+
+    #[test]
+    fn amount_to_chain_units_string_precision() {
+        assert_eq!(amount_to_chain_units(5.67, 9), 5_670_000_000);
+        assert_eq!(amount_to_chain_units(1.005, 6), 1_005_000);
     }
 
     #[test]
