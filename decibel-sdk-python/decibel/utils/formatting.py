@@ -1,69 +1,82 @@
-"""Price and size formatting utilities for converting between human-readable
-values and on-chain integer representations."""
+"""Price and size formatting utilities using Decimal arithmetic for precision.
+
+All chain unit conversions use decimal.Decimal internally to avoid
+binary floating-point representation errors that can cause off-by-one
+chain units (which would be rejected on-chain for tick/lot violations).
+"""
 
 from __future__ import annotations
 
 import math
+from decimal import ROUND_DOWN, ROUND_HALF_UP, ROUND_UP, Decimal
 
 
-def amount_to_chain_units(amount: float, *, decimals: int) -> int:
-    """Convert a decimal amount to integer chain units.
+def _to_decimal(value: float | int | str | Decimal) -> Decimal:
+    """Convert a value to Decimal via string to avoid float representation errors."""
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value))
 
+
+def amount_to_chain_units(amount: float | Decimal, *, decimals: int) -> int:
+    """Convert a decimal amount to integer chain units using Decimal arithmetic.
+    
     Example: amount_to_chain_units(5.67, decimals=9) == 5_670_000_000
-
-    Note:
-        Uses ``round(float * 10**decimals)`` which is sufficient for
-        Decibel's precision requirements.  If deterministic rounding
-        across platforms is needed (e.g. matching on-chain settlement
-        exactly), convert via ``Decimal`` before rounding.
     """
-    return int(round(amount * (10 ** decimals)))
+    d = _to_decimal(amount)
+    factor = Decimal(10) ** decimals
+    return int((d * factor).to_integral_value(rounding=ROUND_HALF_UP))
 
 
 def chain_units_to_amount(chain_units: int, *, decimals: int) -> float:
     """Convert integer chain units back to a decimal amount."""
-    return chain_units / (10 ** decimals)
+    d = Decimal(chain_units)
+    factor = Decimal(10) ** decimals
+    return float(d / factor)
 
 
 def round_to_valid_price(
-    price: float,
+    price: float | Decimal,
     *,
-    tick_size: float,
+    tick_size: float | Decimal,
     round_up: bool = False,
 ) -> float:
-    """Round a price to the nearest valid tick size.
-
-    By default rounds down (conservative for buys).  Set *round_up=True*
-    for sell-side prices (conservative = higher).
-    """
+    """Round a price to the nearest valid tick size using Decimal arithmetic."""
     if price == 0:
         return 0.0
-    ticks = price / tick_size
-    rounded_ticks = math.ceil(ticks) if round_up else math.floor(ticks)
-    return rounded_ticks * tick_size
+    d_price = _to_decimal(price)
+    d_tick = _to_decimal(tick_size)
+    ticks = d_price / d_tick
+    if round_up:
+        rounded_ticks = ticks.to_integral_value(rounding=ROUND_UP)
+    else:
+        rounded_ticks = ticks.to_integral_value(rounding=ROUND_DOWN)
+    return float(rounded_ticks * d_tick)
 
 
 def round_to_valid_order_size(
-    size: float,
+    size: float | Decimal,
     *,
-    lot_size: float,
-    min_size: float,
+    lot_size: float | Decimal,
+    min_size: float | Decimal,
 ) -> float:
-    """Round an order size down to the nearest valid lot size.
-
-    Returns 0.0 when the rounded result is below *min_size*, signalling
-    that the order should not be placed.
+    """Round an order size down to the nearest valid lot size using Decimal.
+    
+    Returns 0.0 when the rounded result is below min_size.
     """
     if size == 0:
         return 0.0
-    lots = math.floor(size / lot_size)
-    rounded = lots * lot_size
-    if rounded < min_size:
+    d_size = _to_decimal(size)
+    d_lot = _to_decimal(lot_size)
+    d_min = _to_decimal(min_size)
+    lots = (d_size / d_lot).to_integral_value(rounding=ROUND_DOWN)
+    rounded = lots * d_lot
+    if rounded < d_min:
         return 0.0
-    return rounded
+    return float(rounded)
 
 
-def to_chain_price(price: float, *, px_decimals: int) -> int:
+def to_chain_price(price: float | Decimal, *, px_decimals: int) -> int:
     """Convert a human-readable price to chain units."""
     return amount_to_chain_units(price, decimals=px_decimals)
 
@@ -73,7 +86,7 @@ def from_chain_price(chain_units: int, *, px_decimals: int) -> float:
     return chain_units_to_amount(chain_units, decimals=px_decimals)
 
 
-def to_chain_size(size: float, *, sz_decimals: int) -> int:
+def to_chain_size(size: float | Decimal, *, sz_decimals: int) -> int:
     """Convert a human-readable size to chain units."""
     return amount_to_chain_units(size, decimals=sz_decimals)
 
