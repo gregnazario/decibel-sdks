@@ -7,7 +7,6 @@ chain units (which would be rejected on-chain for tick/lot violations).
 
 from __future__ import annotations
 
-import math
 from decimal import ROUND_DOWN, ROUND_HALF_UP, ROUND_UP, Decimal
 
 
@@ -20,7 +19,7 @@ def _to_decimal(value: float | int | str | Decimal) -> Decimal:
 
 def amount_to_chain_units(amount: float | Decimal, *, decimals: int) -> int:
     """Convert a decimal amount to integer chain units using Decimal arithmetic.
-    
+
     Example: amount_to_chain_units(5.67, decimals=9) == 5_670_000_000
     """
     d = _to_decimal(amount)
@@ -61,7 +60,7 @@ def round_to_valid_order_size(
     min_size: float | Decimal,
 ) -> float:
     """Round an order size down to the nearest valid lot size using Decimal.
-    
+
     Returns 0.0 when the rounded result is below min_size.
     """
     if size == 0:
