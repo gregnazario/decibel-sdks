@@ -137,10 +137,11 @@ async def stream_prices():
 
     print("\n  Connecting to WebSocket for live price updates...")
     uri = f"{WS_URL}"
-    extra_headers = {"Sec-Websocket-Protocol": f"decibel, {BEARER_TOKEN}"}
 
     try:
-        async with websockets.connect(uri, additional_headers=extra_headers) as ws:
+        async with websockets.connect(
+            uri, subprotocols=["decibel", BEARER_TOKEN]
+        ) as ws:
             sub_msg = json.dumps({"method": "subscribe", "topic": "all_market_prices"})
             await ws.send(sub_msg)
 

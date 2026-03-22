@@ -71,22 +71,6 @@ async def get_open_orders(client: httpx.AsyncClient) -> list[dict]:
     return resp.json()
 
 
-def round_price(price: float, tick_size: float, px_decimals: int) -> int:
-    """Round a human price to valid chain units."""
-    denorm = price * (10**px_decimals)
-    rounded = round(denorm / tick_size) * tick_size
-    return int(round(rounded))
-
-
-def round_size(size: float, lot_size: float, min_size: float, sz_decimals: int) -> int:
-    """Round a human size to valid chain units."""
-    denorm = size * (10**sz_decimals)
-    rounded = int(denorm / lot_size) * lot_size
-    if rounded < min_size:
-        rounded = min_size
-    return int(rounded)
-
-
 async def main():
     if not all([BEARER_TOKEN, PRIVATE_KEY, SUBACCOUNT]):
         print("Error: set BEARER_TOKEN, PRIVATE_KEY, and SUBACCOUNT_ADDRESS")
@@ -119,14 +103,32 @@ async def main():
         print(f"\n  Current {MARKET_NAME} mark price: ${mark_price:,.2f}")
 
         # Step 3: Compute order params — buy 5% below mark
-        order_price = mark_price * 0.95
-        order_size_human = min_sz / (10**sz_dec)  # use minimum size
+        # Use SDK formatting helpers to handle tick/lot rounding and chain unit conversion
+        from decibel.utils.formatting import (
+            amount_to_chain_units,
+            chain_units_to_amount,
+            round_to_valid_order_size,
+            round_to_valid_price,
+        )
 
-        chain_price = round_price(order_price, tick, px_dec)
-        chain_size = round_size(order_size_human, lot, min_sz, sz_dec)
+        order_price_raw = mark_price * 0.95
+        tick_decimal = tick / (10**px_dec)
+        lot_decimal = lot / (10**sz_dec)
+        min_sz_decimal = min_sz / (10**sz_dec)
 
-        human_price = chain_price / (10**px_dec)
-        human_size = chain_size / (10**sz_dec)
+        # Round human-readable values using SDK helpers
+        order_price = round_to_valid_price(order_price_raw, tick_size=tick_decimal)
+        order_size = round_to_valid_order_size(
+            min_sz_decimal, lot_size=lot_decimal, min_size=min_sz_decimal
+        )
+
+        # Convert to chain units for on-chain transaction
+        chain_price = amount_to_chain_units(order_price, decimals=px_dec)
+        chain_size = amount_to_chain_units(order_size, decimals=sz_dec)
+
+        # Verify roundtrip
+        human_price = chain_units_to_amount(chain_price, decimals=px_dec)
+        human_size = chain_units_to_amount(chain_size, decimals=sz_dec)
 
         print(f"\n  Order: BUY {human_size} {MARKET_NAME} @ ${human_price:,.2f}")
         print(f"  Chain units: price={chain_price}, size={chain_size}")

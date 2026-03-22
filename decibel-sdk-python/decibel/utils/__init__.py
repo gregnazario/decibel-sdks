@@ -5,7 +5,6 @@ from decibel.utils.address import (
     get_primary_subaccount_addr,
     get_vault_share_address,
 )
-from decibel.utils.crypto import generate_random_replay_protection_nonce
 from decibel.utils.formatting import (
     amount_to_chain_units,
     chain_units_to_amount,
@@ -19,11 +18,15 @@ from decibel.utils.formatting import (
 from decibel.utils.nonce import generate_replay_protection_nonce
 from decibel.utils.price import round_to_tick_size
 
+# Backward-compatible alias for the v1 name
+generate_random_replay_protection_nonce = generate_replay_protection_nonce
+
 __all__ = [
     "get_market_addr",
     "get_primary_subaccount_addr",
     "get_vault_share_address",
     "round_to_tick_size",
+    "generate_replay_protection_nonce",
     "generate_random_replay_protection_nonce",
     "amount_to_chain_units",
     "chain_units_to_amount",
@@ -33,5 +36,4 @@ __all__ = [
     "from_chain_price",
     "to_chain_size",
     "from_chain_size",
-    "generate_replay_protection_nonce",
 ]

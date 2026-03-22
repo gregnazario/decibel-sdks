@@ -38,7 +38,7 @@ Feature: Risk Monitoring for Trading Bots
       | perp_equity_balance | total_margin |
       | 100000.0            | 80000.0      |
     When the bot checks margin_usage_pct("0xaaa1")
-    Then margin_usage_pct is 80.0
+    Then margin_usage_pct is 0.8
     And the margin warning level is "WARNING"
 
   Scenario: Margin warning escalates to critical at 90%
@@ -46,7 +46,7 @@ Feature: Risk Monitoring for Trading Bots
       | perp_equity_balance | total_margin |
       | 100000.0            | 92000.0      |
     When the bot checks margin_usage_pct("0xaaa1")
-    Then margin_usage_pct is 92.0
+    Then margin_usage_pct is 0.92
     And the margin warning level is "CRITICAL"
 
   # --- Funding accrual ---
